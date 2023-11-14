@@ -25,6 +25,7 @@ namespace Ayana.Controllers
     public class DtoRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
+
         private readonly IDiscountCodeVerifier _discountCodeVerifier;
 
         public DtoRequestsController(ApplicationDbContext context, IDiscountCodeVerifier discountCodeVerifier)
