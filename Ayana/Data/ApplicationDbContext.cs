@@ -29,13 +29,10 @@ namespace Ayana.Data
 
 
 
-
-
-
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
            
+
             modelBuilder.Entity<Order>().ToTable("Orders");
             modelBuilder.Entity<Discount>().ToTable("Discounts");
             modelBuilder.Entity<Payment>().ToTable("Payments");
@@ -46,7 +43,7 @@ namespace Ayana.Data
             modelBuilder.Entity<ProductOrder>().ToTable("ProductOrders");
             modelBuilder.Entity<ProductSales>().ToTable("ProductSales");
 
-            modelBuilder.Entity<ApplicationUser>().ToTable("AspNetUsers");
+  
             modelBuilder.Entity<DtoRequest>().ToTable("DtoRequests");
             modelBuilder.Entity<ApplicationUser>().Property(e => e.FullName);
             modelBuilder.Entity<ApplicationUser>().Property(e => e.Id);
