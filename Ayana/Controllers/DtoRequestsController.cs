@@ -114,7 +114,7 @@ namespace Ayana.Controllers
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userId == null)
-                return View("Error","Only reigtered users can buy our products. Sign up and enjoy our products");
+                return View("Error","Only registered users can buy our products. Sign up and enjoy our products");
 
 
             var cart = _context.Cart.FirstOrDefault(o => o.CustomerID == userId && o.ProductID == id);
@@ -255,9 +255,6 @@ namespace Ayana.Controllers
 
 
             }
-
-
-
 
             // Set up the payment instance
             Payment payment1 = new Payment

@@ -147,7 +147,7 @@ namespace Ayana.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Employee")]
 
-        public async Task<IActionResult> Create([Bind("ProductID,Name,Price,Stock,SalesHistory,Category,Description")] Product product)
+        public async Task<IActionResult> Create([Bind("ProductID,Name,Price,Stock,FlowerType,ImageUrl,productType,SalesHistory,Category,Description")] Product product)
         {
             if (ModelState.IsValid)
             {

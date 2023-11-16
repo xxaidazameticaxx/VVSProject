@@ -8860,11 +8860,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\Project-Flowershop-\\Ayana\\Ayana.csproj",
+      "projectUniqueName": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject\\Ayana\\Ayana.csproj",
       "projectName": "Ayana",
-      "projectPath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\Project-Flowershop-\\Ayana\\Ayana.csproj",
+      "projectPath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject\\Ayana\\Ayana.csproj",
       "packagesPath": "C:\\Users\\Aida\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\Project-Flowershop-\\Ayana\\obj\\",
+      "outputPath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject\\Ayana\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Aida\\AppData\\Roaming\\NuGet\\NuGet.Config",
