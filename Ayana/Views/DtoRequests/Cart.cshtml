@@ -142,7 +142,7 @@
                             <div style="display:flex; align-items:center">
                                 <input id="discountCodeInput" asp-for="@Model.discount.DiscountCode" class="form-control" value="@ViewBag.DiscountCode" style="width: 88%;" />
                                 <span class="input-group-append">
-                                    @if (string.IsNullOrWhiteSpace(ViewBag.DiscountCode) || ViewBag.DiscountCode == "Wrong code,try again..." || ViewBag.DiscountCode == "Code is expired...")
+                                    @if (string.IsNullOrWhiteSpace(ViewBag.DiscountCode) || ViewBag.DiscountCode == "Wrong code, try again..." || ViewBag.DiscountCode == "Code is expired...")
                                     {
                                         <button id="applyDiscountBtn" style="background-color: #f2b6c1; border:white;padding: 10px 20px; height:35px;border-radius: 5px; text-decoration: none; color: #fff; font-weight: bold">&#x2713;</button>
 
