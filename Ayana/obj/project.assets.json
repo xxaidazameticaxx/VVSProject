@@ -8855,19 +8855,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\User\\.nuget\\packages\\": {}
+    "C:\\Users\\Aida\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\OneDrive\\Desktop\\VVSProject\\Ayana\\Ayana.csproj",
+      "projectUniqueName": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject-needs refactor\\VVSProject\\Ayana\\Ayana.csproj",
       "projectName": "Ayana",
-      "projectPath": "C:\\Users\\User\\OneDrive\\Desktop\\VVSProject\\Ayana\\Ayana.csproj",
-      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\OneDrive\\Desktop\\VVSProject\\Ayana\\obj\\",
+      "projectPath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject-needs refactor\\VVSProject\\Ayana\\Ayana.csproj",
+      "packagesPath": "C:\\Users\\Aida\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject-needs refactor\\VVSProject\\Ayana\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Aida\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -8949,7 +8949,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.403\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }

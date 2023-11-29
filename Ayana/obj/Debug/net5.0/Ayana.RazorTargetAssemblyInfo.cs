@@ -17,7 +17,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyProductAttribute("Ayana")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac3f2a9cc9b2b12594ba7f9bcc84c18e964e638f")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Ayana.Views")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
