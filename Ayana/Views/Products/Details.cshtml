@@ -106,7 +106,7 @@ else{
 
     async function AddToCart() {
         const parameters = new URLSearchParams();
-        parameters.append("id", @Model.ProductID.ToString());
+        parameters.append("productId", @Model.ProductID.ToString());
         const url = "/DtoRequests/AddToCart?" + parameters.toString();
 
         console.log(url);

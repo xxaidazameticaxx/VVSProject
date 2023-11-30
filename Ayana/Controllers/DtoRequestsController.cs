@@ -182,6 +182,10 @@ namespace Ayana.Controllers
             // Dobavljanje ID-ja trenutno prijavljenog korisnika
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+            // Provjera da li je korisnik prijavljen
+            if (userId == null)
+                return View("Error");
+
             // Dobavljanje korpi specifičnih za korisnika na osnovu CustomerId
             List<Cart> userCarts = _context.Cart
                 .Where(o => o.CustomerID == userId)
