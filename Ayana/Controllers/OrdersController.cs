@@ -9,6 +9,7 @@ using System.Security.Claims;
 
 namespace Ayana.Controllers
 {
+    // Controller responsible for managing and processing user order reviews
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -44,11 +45,12 @@ namespace Ayana.Controllers
                 .Include(o => o.Payment)
                 .Where(o => o.CustomerID == userId)
                 .ToList();
+            userOrders = userOrders.OrderBy(order => order.Rating).ToList();
             // Get the associated products for each order
             List<List<Product>> orderProducts = GetOrderProducts(userOrders);
 
             // Pass the userOrders and orderProducts to the view
-            ViewBag.UserOrders = userOrders.OrderBy(order => order.Rating).ToList(); 
+            ViewBag.UserOrders = userOrders;
             ViewBag.OrderProducts = orderProducts;
 
             // Render the view
@@ -62,12 +64,14 @@ namespace Ayana.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind("OrderID,Rating")] Order order)
         {
-            var o = _context.Orders.ToList();
-            var existingOrder = o.Find(m => m.OrderID == order.OrderID);
-
+            var existingOrder = await _context.Orders.FindAsync(order.OrderID);
+            if (existingOrder == null)
+            {
+                return NotFound();
+            }
             existingOrder.Rating = order.Rating;
-            _context.SaveChanges();
-            return Redirect("/Orders/UserOrders");
+            await _context.SaveChangesAsync();
+            return Redirect("UserOrders/Orders");
         }
     }
 }
