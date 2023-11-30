@@ -94,6 +94,8 @@ namespace Ayana.Controllers
             }
             return View("~/Views/Products/SearchResult.cshtml", ViewBag.p);
         }
+
+        //Sort products
         [HttpGet]
         public ActionResult Sort(string sortOption, string String)
         {
@@ -214,7 +216,7 @@ namespace Ayana.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Employee")]
-
+        //Edit name and price of products
         public async Task<IActionResult> EditNameAndPrice(int id, [Bind("ProductID,Name,Price")] Product product)
         {
             if (id != product.ProductID)
