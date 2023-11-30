@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "qDM0WbOrBMsuJQmdXkjVsN6e55Qh20ymZH36D3h/jK7bXTiZQZrhlgEZ7Uw7UNHhjlfpqr6TsQEP1/fQgB3MHw==",
+  "dgSpecHash": "ZGXSULjUKZKVngVOaVOUb1POxNrpxFS11Pxfx4ev4BOpZQ7vUA2Z+PCWt5NOso0QX4ti/nYMAl8j2Ao9hHGXWA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject-needs refactor\\VVSProject\\Ayana\\Ayana.csproj",
+  "projectFilePath": "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject-needs refactor\\VVSProject\\VVSProject\\Ayana\\Ayana.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Aida\\.nuget\\packages\\epplus\\6.2.4\\epplus.6.2.4.nupkg.sha512",
     "C:\\Users\\Aida\\.nuget\\packages\\epplus.interfaces\\6.1.1\\epplus.interfaces.6.1.1.nupkg.sha512",
