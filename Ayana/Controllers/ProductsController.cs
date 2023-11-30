@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Ayana.Data;
 using Ayana.Models;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using System.Text.RegularExpressions;
-using static Humanizer.On;
 using Ayana.Patterns;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
 using Ayana.Paterni;
 
 namespace Ayana.Controllers
@@ -32,9 +27,9 @@ namespace Ayana.Controllers
         {
             return View(await _context.Products.ToListAsync());
         }
-       
 
-       
+
+
         // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -74,26 +69,27 @@ namespace Ayana.Controllers
             }
         }
 
-        public IActionResult PopularSearches(string popularsearch)
+        public IActionResult PopularSearches(string popularSearch)
         {
             List<Product> products = _context.Products.ToList();
-            bool isItBAM = Regex.IsMatch(popularsearch, "BAM", RegexOptions.IgnoreCase);
-            if (isItBAM)
+            bool isItBam = Regex.IsMatch(popularSearch, "BAM", RegexOptions.IgnoreCase);
+            if (isItBam)
             {
-                int o = int.Parse(popularsearch.Substring(4).Split(".").First());
+                int o = int.Parse(popularSearch.Substring(4).Split(".").First());
                 List<Product> inPriceRange = products.FindAll(p => p.Price <= o);
                 ViewBag.p = inPriceRange;
             }
             else
             {
-                List<Product> categoryList = _context.Products.ToList().FindAll(x => x.Category.ToLower() == popularsearch.ToLower());
+                List<Product> categoryList = _context.Products.ToList().FindAll(x => x.Category.ToLower() == popularSearch.ToLower());
 
                 if (categoryList.Count == 0)
                 {
-                    categoryList= _context.Products.ToList().FindAll(x => x.FlowerType.ToLower() == popularsearch.ToLower());
+                    categoryList = _context.Products.ToList()
+                        .FindAll(x => x.FlowerType != null && x.FlowerType.ToLower() == popularSearch.ToLower());
 
                 }
-                ViewBag.String = popularsearch;
+                ViewBag.String = popularSearch;
                 ViewBag.p = categoryList;
             }
             return View("~/Views/Products/SearchResult.cshtml", ViewBag.p);
@@ -121,19 +117,22 @@ namespace Ayana.Controllers
                 sortStrategy = new AscendingNameSortStrategy();
             List<Product> searchResults;
             if (String != null)
-            { searchResults = _context.Products.Where(x => x.Category == String).ToList();
-                if (searchResults.Count() == 0)
+            {
+                searchResults = _context.Products.Where(x => x.Category == String).ToList();
+                if (!searchResults.Any())
                 {
                     searchResults = _context.Products.Where(x => x.FlowerType == String).ToList();
                 }
-                if(searchResults.Count()==0){ 
-                string pattern = $"{Regex.Escape(String)}";
-                searchResults = _context.Products.ToList().Where(p => Regex.IsMatch(p.Name, pattern, RegexOptions.IgnoreCase)).ToList();
-            }}
-           
+                if (!searchResults.Any())
+                {
+                    string pattern = $"{Regex.Escape(String)}";
+                    searchResults = _context.Products.ToList().Where(p => Regex.IsMatch(p.Name, pattern, RegexOptions.IgnoreCase)).ToList();
+                }
+            }
+
             else
                 searchResults = _context.Products.ToList();
-            
+
             ViewBag.String = String;
             var sortedProducts = sortStrategy.Sort(searchResults);
             ViewBag.SelectedSortOption = sortOption;
@@ -141,7 +140,7 @@ namespace Ayana.Controllers
             return PartialView("~/Views/Products/SearchResult.cshtml", sortedProducts);
         }
         // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // To protect from over posting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -176,7 +175,7 @@ namespace Ayana.Controllers
             return View(product);
         }
         // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // To protect from over posting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -193,7 +192,7 @@ namespace Ayana.Controllers
             {
                 try
                 {
-                    _productEditor.EditAll(product);
+                    await _productEditor.EditAll(product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -206,8 +205,8 @@ namespace Ayana.Controllers
                         throw;
                     }
                 }
-                var AllProducts = _context.Products.ToList();
-                return View("~/Views/Home/Index.cshtml", AllProducts);
+                var allProducts = _context.Products.ToList();
+                return View("~/Views/Home/Index.cshtml", allProducts);
             }
 
             return View("~/Views/Home/Index.cshtml");
@@ -227,7 +226,7 @@ namespace Ayana.Controllers
             {
                 try
                 {
-                    _productEditor.EditNameAndPrice(id, product);
+                    await _productEditor.EditNameAndPrice(id, product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -240,8 +239,8 @@ namespace Ayana.Controllers
                         throw;
                     }
                 }
-                var AllProducts = _context.Products.ToList();
-                return View("~/Views/Home/Index.cshtml", AllProducts);
+                var allProducts = _context.Products.ToList();
+                return View("~/Views/Home/Index.cshtml", allProducts);
             }
 
             return View("~/Views/Home/Index.cshtml");
