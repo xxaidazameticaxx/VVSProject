@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ayana", "Ayana\Ayana.csproj", "{5876AB30-54E6-4310-BFE8-F22162135F22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ayana", "Ayana\Ayana.csproj", "{5876AB30-54E6-4310-BFE8-F22162135F22}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AyanaTests", "AyanaTests\AyanaTests.csproj", "{4554CBA9-DC42-43AE-92B4-D41EDDC897C1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5876AB30-54E6-4310-BFE8-F22162135F22} = {5876AB30-54E6-4310-BFE8-F22162135F22}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{5876AB30-54E6-4310-BFE8-F22162135F22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5876AB30-54E6-4310-BFE8-F22162135F22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5876AB30-54E6-4310-BFE8-F22162135F22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4554CBA9-DC42-43AE-92B4-D41EDDC897C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4554CBA9-DC42-43AE-92B4-D41EDDC897C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4554CBA9-DC42-43AE-92B4-D41EDDC897C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4554CBA9-DC42-43AE-92B4-D41EDDC897C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
