@@ -223,7 +223,7 @@ namespace Ayana.Controllers
             return View();
         }
 
-        private async Task<(double totalWithDiscount, int? discountId, double? discountAmount)> ApplyDiscount(Payment payment, Discount discount)
+        public async Task<(double totalWithDiscount, int? discountId, double? discountAmount)> CalculateDiscount(Payment payment, Discount discount)
         {
            
             int? discountId = null;
@@ -360,7 +360,7 @@ namespace Ayana.Controllers
             var totalWithoutDiscount = payment.PayedAmount;
 
             // Parse the tuple results from the ApplyDiscount method
-            var discountResult = await ApplyDiscount(payment, discount);
+            var discountResult = await CalculateDiscount(payment, discount);
             double totalWithDiscount = discountResult.totalWithDiscount;
             int? discountId = discountResult.discountId;
             double? discountAmount = discountResult.discountAmount;
