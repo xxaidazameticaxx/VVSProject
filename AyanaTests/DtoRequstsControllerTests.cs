@@ -32,7 +32,6 @@ namespace AyanaTests
 
             var mockDiscountCodeVerifier = new Mock<IDiscountCodeVerifier>();
 
-            // Mock HttpContextAccessor to simulate a null User
             var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
             mockHttpContextAccessor.Setup(a => a.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim)null);
 
@@ -44,9 +43,8 @@ namespace AyanaTests
                 }
             };
 
-            await controller.RemoveItem(0);
-        }
-        
+            await controller.RemoveItem(0);}
+      
         // written by : Aida Zametica
         [TestMethod]
         public async Task ApplyDiscount_ValidCodeAndNotExpiredPercentageOff_ShouldRedirectToCartWithDiscount()
@@ -143,21 +141,20 @@ namespace AyanaTests
             Assert.AreEqual("Cart", result.ActionName);
         }
 
+        // written by : Aida Zametica
         [TestMethod]
-        public async Task ApplyDiscount_ValidDiscountCodeAndNotExpired_ShouldApplyDiscountCorrectly()
+        public async Task CalculateDiscount_ValidDiscountType2AndNotExpired_ShouldApplyDiscountCorrectly()
         {
-            // Arrange
             var payment = new Payment
             {
-                PayedAmount = 100 // Set a value based on your test scenario
+                PayedAmount = 100 
             };
 
             var discount = new Discount
             {
-                DiscountCode = "ValidDiscountCode" // Set a valid discount code based on your test scenario
+                DiscountCode = "ValidDiscountCode" 
             };
 
-            // Mock the IDiscountCodeVerifier
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
             discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
             discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(true);
@@ -169,15 +166,74 @@ namespace AyanaTests
             });
             var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
 
+            var result = await controller.CalculateDiscount(payment, discount);
+
+            Assert.AreEqual(90, result.totalWithDiscount);
+            Assert.AreEqual(1, result.discountId); 
+            Assert.AreEqual(10, result.discountAmount); 
+        }
+
+        //written by : Aida Zametica
+        [TestMethod]
+        public async Task CalculateDiscount_ValidDiscountType1AndNotExpired_ShouldApplyDiscountCorrectly()
+        {
+            var payment = new Payment
+            {
+                PayedAmount = 100
+            };
+
+            var discount = new Discount
+            {
+                DiscountCode = "ValidDiscountCode"
+            };
+
+            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
+            discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
+            discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(true);
+            discountCodeVerifierMock.Setup(x => x.GetDiscount("ValidDiscountCode")).Returns(new Discount
+            {
+                DiscountID = 1,
+                DiscountAmount = 10,
+                DiscountType = DiscountType.AmountOff
+            });
+            var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
+
+            var result = await controller.CalculateDiscount(payment, discount);
+
+            Assert.AreEqual(90, result.totalWithDiscount);
+            Assert.AreEqual(1, result.discountId);
+            Assert.AreEqual(10, result.discountAmount);
+        }
+
+        // written by: Aida Zametica
+        [TestMethod]
+        public async Task CalculateDiscount_ValidDiscountCodeButExpired_ShouldNotApplyDiscount()
+        {
+            // Arrange
+            var payment = new Payment
+            {
+                PayedAmount = 100
+            };
+
+            var discount = new Discount
+            {
+                DiscountCode = "ValidDiscountCode"
+            };
+
+            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
+            discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
+            discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(false);
+
+            var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
+
             // Act
             var result = await controller.CalculateDiscount(payment, discount);
 
             // Assert
-            Assert.AreEqual(90, result.totalWithDiscount); // Adjust based on your expected result
-            Assert.AreEqual(1, result.discountId); // Adjust based on your expected result
-            Assert.AreEqual(10, result.discountAmount); // Adjust based on your expected result
+            Assert.AreEqual(100, result.totalWithDiscount);
+            Assert.AreEqual(1, result.discountId);
+            Assert.AreEqual(0, result.discountAmount);
         }
-
 
     }
 }
