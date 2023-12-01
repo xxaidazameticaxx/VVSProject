@@ -3,23 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Ayana.Data;
 using Ayana.Models;
 using System.Security.Claims;
-using Humanizer;
-using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
-using static Humanizer.In;
-using static Humanizer.On;
-using System.Diagnostics;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
-using Microsoft.VisualBasic;
 using Ayana.Paterni;
-using System.Collections;
 
 namespace Ayana.Controllers
 {
@@ -46,7 +33,7 @@ namespace Ayana.Controllers
             var isDiscountCodeValid =  _discountCodeVerifier.VerifyDiscountCode(userInputtedCode); 
             if (!isDiscountCodeValid)
                 userInputtedCode = "Wrong code, try again...";
-            else if (isDiscountCodeValid && !_discountCodeVerifier.VerifyExperationDate(userInputtedCode))
+            else if (!_discountCodeVerifier.VerifyExperationDate(userInputtedCode))
                 userInputtedCode = "Code is expired...";
             else
             {
@@ -72,11 +59,15 @@ namespace Ayana.Controllers
         public async Task<IActionResult> RemoveItem(int id)
         {
             // Dobavljanje ID korisnika koji je trenutno prijavljen
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Provjera da li je korisnik prijavljen
-            if (userId == null)
-                return View("Error");
+            string userId;
+            try
+            {
+                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch (System.NullReferenceException e)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
 
             //Pronalaženje stavke u korpi na osnovu ID korisnika i ID proizvoda
             var cart = _context.Cart.FirstOrDefault(o => o.CustomerID == userId && o.ProductID == id);
@@ -123,7 +114,7 @@ namespace Ayana.Controllers
             if (existingCartItem == null)
             {
                 // Korisnik ima cart za svaki proizvod zasebno, gdje je upisan ID i količina proizvoda
-                Cart newCartItem = new Cart()
+                Cart newCartItem = new()
                 {
                     CustomerID = userId,
                     ProductID = productId,
@@ -151,7 +142,7 @@ namespace Ayana.Controllers
         public List<List<Product>> GetCartProducts(List<Cart> carts)
         {
             // Lista koja će sadržavati listu proizvoda za svaku korpu
-            List<List<Product>> cartProducts = new List<List<Product>>();
+            List<List<Product>> cartProducts = new();
 
             // Iteracija kroz svaku korpu u listi korpi
             foreach (var cart in carts)
@@ -272,7 +263,7 @@ namespace Ayana.Controllers
 
         private async Task<Payment> SavePaymentData(Payment payment, double totalWithDiscount, int? discountId)
         {
-            Payment paymentForOrder = new Payment
+            Payment paymentForOrder = new()
             {
                 BankAccount = payment.BankAccount,
                 DeliveryAddress = payment.DeliveryAddress,
@@ -289,7 +280,7 @@ namespace Ayana.Controllers
 
         private async Task<Order> SaveOrderData(Order order, string userId, Payment paymentForOrder, double totalWithDiscount)
         {
-            Order newOrder = new Order
+            Order newOrder = new()
             {
                 DeliveryDate = order.DeliveryDate,
                 CustomerID = userId,
@@ -322,7 +313,7 @@ namespace Ayana.Controllers
 
                 foreach (var product in products)
                 {
-                    ProductOrder productOrder = new ProductOrder
+                    ProductOrder productOrder = new()
                     {
                         OrderID = newOrder.OrderID,
                         ProductID = product.ProductID,
@@ -331,7 +322,7 @@ namespace Ayana.Controllers
 
                     for (var k = 0; k < cart.ProductQuantity; k++)
                     {
-                        ProductSales productSales = new ProductSales
+                        ProductSales productSales = new()
                         {
                             SalesDate = DateTime.Now,
                             ProductID = product.ProductID
