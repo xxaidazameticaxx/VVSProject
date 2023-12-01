@@ -25,11 +25,11 @@ namespace Ayana.Controllers
         public async Task<IActionResult> ApplyDiscount(string userInputtedCode)
         {
 
-            // Inicijalne vrijednosti za discountAmount i discountType 
+            // Initial values for discountAmount and discountType
             double appliedDiscountAmount = 0;
             string appliedDiscountType = "";
 
-            // Provjera da li uneseni korisnički kod postoji u bazi i da li je istekao
+            // Check if the user-entered code exists in the database and is not expired
             var isDiscountCodeValid =  _discountCodeVerifier.VerifyDiscountCode(userInputtedCode); 
             if (!isDiscountCodeValid)
                 userInputtedCode = "Wrong code, try again...";
@@ -37,16 +37,16 @@ namespace Ayana.Controllers
                 userInputtedCode = "Code is expired...";
             else
             {
-                // Ako je kod validan i nije istekao, dohvati informacije o popustu iz baze
+                // If the code is valid and not expired, retrieve discount information from the database
                 Discount appliedDiscount = _discountCodeVerifier.GetDiscount(userInputtedCode);
                 appliedDiscountAmount = appliedDiscount.DiscountAmount;
                 appliedDiscountType = appliedDiscount.DiscountType.ToString();
             }
 
-            // Odredi tip popusta (0 za PercentageOff, 1 za AmountOff)
+            // Determine the discount type (0 for PercentageOff, 1 for AmountOff)
             var discountTypeCode = appliedDiscountType == "AmountOff" ? 1 : 0;
 
-            // Ažuriraj trenutni cart s novim informacijama o popustu ili ostavi bez popusta ako kod nije validan
+            // Update the current cart with new discount information or leave it without a discount if the code is not valid
             return RedirectToAction("Cart", new 
             {
                 discountAmount = appliedDiscountAmount.ToString(),
@@ -58,36 +58,33 @@ namespace Ayana.Controllers
 
         public async Task<IActionResult> RemoveItem(int id)
         {
-            // Dobavljanje ID korisnika koji je trenutno prijavljen
-            string userId;
-            try
-            {
-                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch (System.NullReferenceException e)
+            // Get the ID of the currently logged-in user
+
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            //Pronalaženje stavke u korpi na osnovu ID korisnika i ID proizvoda
+            // Find the item in the cart based on the user ID and product ID
             var cart = _context.Cart.FirstOrDefault(o => o.CustomerID == userId && o.ProductID == id);
 
-            // Provjera količine proizvoda u korpi
+            // Check the quantity of the product in the cart
             if (cart.ProductQuantity != 1)
             {
-                // Smanjenje količine proizvoda za jedan i ažuriranje baze podataka
+                // Decrease the quantity of the product by one and update the database
                 cart.ProductQuantity--;
                 await _context.SaveChangesAsync();
             }
 
             else
             {
-                // Ako je količina proizvoda jednaka 1, uklanjanje stavke iz korpe
+                // If the quantity of the product is 1, remove the item from the cart
                 _context.Remove(cart);
                 await _context.SaveChangesAsync();
             }
 
-            // Redirekcija na akciju "Cart" i uklananje popusta zato što se mijenja ukupna cijena narudžbe 
+            // Redirect to the "Cart" action and remove the discount because the total order amount is changing
             return RedirectToAction("Cart", new
             {
                 discountAmount = 0,
@@ -100,20 +97,20 @@ namespace Ayana.Controllers
 
         public async Task<IActionResult> AddToCart(int productId)
         {
-            // Dobavljanje ID korisnika koji je trenutno prijavljen
+            // Get the ID of the currently logged-in user
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Provjera da li je korisnik prijavljen
+            // Check if the user is logged in
             if (userId == null)
                 return View("Error","Only registered users can buy our products. Sign up and enjoy our products");
 
-            // Pretraga korpe da li već postoji proizvod sa datim ID-jem za trenutnog korisnika
+            // Search the cart to see if there is already a product with the given ID for the current user
             var existingCartItem = _context.Cart.FirstOrDefault(o => o.CustomerID == userId && o.ProductID == productId);
 
-            // Ako proizvod nije pronađen u korpi, dodaj ga
+            // If the product is not found in the cart, add it
             if (existingCartItem == null)
             {
-                // Korisnik ima cart za svaki proizvod zasebno, gdje je upisan ID i količina proizvoda
+                // Each product has its own cart for the user, where the ID and quantity of the product are stored
                 Cart newCartItem = new()
                 {
                     CustomerID = userId,
@@ -122,18 +119,18 @@ namespace Ayana.Controllers
 
                 };
 
-                // Dodavanje novog proizvoda u korpu
+                // Add the new product to the cart
                 _context.Add(newCartItem);
                 await _context.SaveChangesAsync();
             }
             else
             {
-                // Ako proizvod već postoji, povećaj količinu
+                // If the product already exists, increase the quantity
                 existingCartItem.ProductQuantity++;
                 await _context.SaveChangesAsync();
             }
 
-            // Vraćanje JSON odgovora koji označava uspeh operacije
+            // Return a JSON response indicating the success of the operation
             return Json(new { message = "Radi!" });
 
         }
@@ -141,56 +138,56 @@ namespace Ayana.Controllers
 
         public List<List<Product>> GetCartProducts(List<Cart> carts)
         {
-            // Lista koja će sadržavati listu proizvoda za svaku korpu
+            // List that will contain a list of products for each cart
             List<List<Product>> cartProducts = new();
 
-            // Iteracija kroz svaku korpu u listi korpi
+            // Iterate through each cart in the list of carts
             foreach (var cart in carts)
             {
-                // Dobavljanje proizvoda za trenutnu korpu iz baze podataka
+                // Get the products for the current cart from the database
                 var products = _context.Cart
                     .Where(po => po.CartID == cart.CartID)
                     .Select(po => po.Product)
                     .ToList();
 
-                // Dodavanje liste proizvoda za trenutnu korpu u glavnu listu
+                // Add the list of products for the current cart to the main list
                 cartProducts.Add(products);
             }
 
-            // Vraćanje liste listi proizvoda za svaku korpu
+            // Return the list of lists of products for each cart
             return cartProducts;
         }
 
         // GET: DtoRequests/Create
         public IActionResult Cart(string discountAmount, string discountType, string discountCode = "")
         {
-            // Parsiranje vrijednosti za popust
+            // Parse values for the discount
             double doubleDiscountAmount = Double.Parse(discountAmount);
 
-            // Parsiranje vrijednosti za tip popusta
+            // Parse values for the discount type
             int intDiscountType = int.Parse(discountType);
 
-            // Dobavljanje ID-ja trenutno prijavljenog korisnika
+            // Get the ID of the currently logged-in user
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Provjera da li je korisnik prijavljen
+            // Check if the user is logged in
             if (userId == null)
                 return View("Error");
 
-            // Dobavljanje korpi specifičnih za korisnika na osnovu CustomerId
+            // Get user-specific carts based on CustomerId
             List<Cart> userCarts = _context.Cart
                 .Where(o => o.CustomerID == userId)
                 .ToList();
 
-            // Dobavljanje povezanih proizvoda za svaku korpu
+            // Get related products for each cart
             List<List<Product>> cartProducts = GetCartProducts(userCarts);
 
-            // Prosljeđivanje korisničkih korpi i proizvoda korpi u view
+            // Pass user carts and cart products to the view
             ViewBag.UserCarts = userCarts;
             ViewBag.CartProducts = cartProducts;
             ViewBag.DiscountCode = discountCode;
 
-            // Računanje ukupnog iznosa bez popusta
+            // Calculate the total amount without discount
             double amountToPayWithoutDiscount = 0;
 
             for (var i = 0; i < userCarts.Count; i++)
@@ -200,26 +197,26 @@ namespace Ayana.Controllers
 
                 foreach (var product in products)
                 {
-                    // Dodavanje cijene proizvoda pomnožene sa količinom u ukupni iznos
+                    // Add the product price multiplied by the quantity to the total amount
                     amountToPayWithoutDiscount += (double)(product.Price * cart.ProductQuantity);
                 }
             }
 
-            // Računanje ukupnog iznosa sa popustom
+            // Calculate the total amount with discount
             double amountToPayWithDiscount = 0;
 
-            // AmountOff tip popusta 1
+            // AmountOff discount type 1
             if (intDiscountType == 1)
-                // Računanje iznosa sa fiksnim popustom
+                // Calculate the amount with a fixed discount
                 amountToPayWithDiscount = amountToPayWithoutDiscount - doubleDiscountAmount;
             else
             {
-                // PercentageOff tip popusta 0
-                // Računanje iznosa sa procentualnim popustom
+                // PercentageOff discount type 0
+                // Calculate the amount with a percentage discount
                 amountToPayWithDiscount = (amountToPayWithoutDiscount * (100 - doubleDiscountAmount)) / 100;
             }
 
-            // Prosljeđivanje iznosa koji treba platiti u view
+            // Pass the amount to be paid to the view
             ViewBag.TotalAmountToPay = amountToPayWithDiscount;
 
             return View();
@@ -233,12 +230,12 @@ namespace Ayana.Controllers
 
             double totalWithDiscount = payment.PayedAmount;
 
-            // Provjeri postoji li uneseni kod za popust
+            // Check if the entered discount code exists
             if (discount.DiscountCode != null)
             {
                 int? discountType = null;
 
-                // Provjeri i primijeni popust ukoliko je kod ispravan i nije istekao
+                // Check and apply the discount if the code is valid and not expired
                 if (_discountCodeVerifier.VerifyDiscountCode(discount.DiscountCode))
                 {
                     if (_discountCodeVerifier.VerifyExperationDate(discount.DiscountCode))
@@ -249,7 +246,7 @@ namespace Ayana.Controllers
                         discountAmount = discount.DiscountAmount;
                     }
                 }
-                // Primijeni popust na ukupnu cijenu
+                // Apply the discount to the total price
                 if (discountType == 1)
                     totalWithDiscount = (double)(totalWithDiscount - discountAmount);
                 else
@@ -347,11 +344,10 @@ namespace Ayana.Controllers
 
         public async Task<IActionResult> OrderCreate([Bind("Name,Price,personalMessage,DeliveryDate")] Order order, [Bind("DeliveryAddress,BankAccount,PaymentType,PayedAmount")] Payment payment, [Bind("DiscountCode")] Discount discount)
         {
-
-            // Dobavljanje ID-ja trenutno prijavljenog korisnika
+            // Get the ID of the currently logged-in user
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Provjeri da li je korisnik prijavljen
+            // Check if the user is logged in
             var existingCustomer = _context.Users.FirstOrDefault(m => m.Id == userId);
 
             if (userId == null)
@@ -359,22 +355,22 @@ namespace Ayana.Controllers
                 return View("~/Views/Shared/Error.cshtml");
             }
 
-            // Ukupna cijena korpe bez discounta se dodaje na novi order 
+            // Total cart price without discount is added to the new order
             var totalWithoutDiscount = payment.PayedAmount;
 
-            // Parsiranje tuple rezultata iz metode ApplyDiscount
+            // Parse the tuple results from the ApplyDiscount method
             var discountResult = await ApplyDiscount(payment, discount);
             double totalWithDiscount = discountResult.totalWithDiscount;
             int? discountId = discountResult.discountId;
             double? discountAmount = discountResult.discountAmount;
 
-            // Kreiranje paymenta za order
+            // Create payment for the order
             Payment paymentForOrder = await SavePaymentData(payment, totalWithDiscount, discountId);
 
-            // Kreiranje ordera
+            // Create the order
             Order newOrder = await SaveOrderData(order, userId, paymentForOrder, totalWithDiscount);
 
-            // Brisanje carta i ažuriranje tabela za izvještaj o broju prodanih produkata
+            // Clear the cart and update tables for the sales report
             await ProcessCartItems(userId, newOrder);
 
             return Redirect("/DtoRequests/ThankYou?orderType=order");
