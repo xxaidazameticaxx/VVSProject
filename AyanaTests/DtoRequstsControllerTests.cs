@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Moq;
 using Ayana.Controllers;
 using Ayana.Data;
@@ -11,11 +11,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
+
 namespace AyanaTests
 {
+   
     [TestClass]
     public class DtoRequestsControllerTests
     {
+     
         // written by : Aida Zametica
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -43,5 +46,33 @@ namespace AyanaTests
 
             await controller.RemoveItem(0);
         }
+        
+        // written by : Aida Zametica
+        [TestMethod]
+        public async Task ApplyDiscount_ValidCodeAndNotExpiredPercentageOff_ShouldRedirectToCartWithDiscount()
+        {
+            
+            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
+            discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
+            discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(true);
+            discountCodeVerifierMock.Setup(x => x.GetDiscount("ValidDiscountCode")).Returns(new Discount
+            {
+                DiscountAmount = 10,
+                DiscountType = DiscountType.PercentageOff
+            });
+
+            var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
+
+            var result = await controller.ApplyDiscount("ValidDiscountCode") as RedirectToActionResult;
+
+          
+            Assert.IsNotNull(result);
+            Assert.AreEqual("ValidDiscountCode", result.RouteValues["discountCode"]); // Updated to check discountCode
+            Assert.AreEqual("Cart", result.ActionName);
+        }
+
+
+       
+
     }
 }

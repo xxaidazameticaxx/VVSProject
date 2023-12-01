@@ -68,6 +68,7 @@ namespace Ayana.Controllers
 
             // Find the item in the cart based on the user ID and product ID
             var cart = _context.Cart.FirstOrDefault(o => o.CustomerID == userId && o.ProductID == id);
+           
 
             // Check the quantity of the product in the cart
             if (cart.ProductQuantity != 1)
@@ -370,7 +371,7 @@ namespace Ayana.Controllers
             // Create the order
             Order newOrder = await SaveOrderData(order, userId, paymentForOrder, totalWithDiscount);
 
-            // Clear the cart and update tables for the sales report
+             // Clear the cart and update tables for the sales report
             await ProcessCartItems(userId, newOrder);
 
             return Redirect("/DtoRequests/ThankYou?orderType=order");
