@@ -16,6 +16,7 @@ namespace Ayana.Controllers
 
         private readonly IDiscountCodeVerifier _discountCodeVerifier;
 
+
         public DtoRequestsController(ApplicationDbContext context, IDiscountCodeVerifier discountCodeVerifier)
         {
             _context = context;
@@ -59,7 +60,6 @@ namespace Ayana.Controllers
         public async Task<IActionResult> RemoveItem(int id)
         {
             // Get the ID of the currently logged-in user
-
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
@@ -67,24 +67,27 @@ namespace Ayana.Controllers
             }
 
             // Find the item in the cart based on the user ID and product ID
-            var cart = _context.Cart.FirstOrDefault(o => o.CustomerID == userId && o.ProductID == id);
-           
+            var cart = _context.Cart.Where(o => o.CustomerID == userId && o.ProductID == id)
+                .FirstOrDefault();
 
-            // Check the quantity of the product in the cart
-            if (cart.ProductQuantity != 1)
+            // Check if the item is found
+            if (cart != null)
             {
-                // Decrease the quantity of the product by one and update the database
-                cart.ProductQuantity--;
+
+                // Check the quantity of the product in the cart
+                if (cart.ProductQuantity != 1)
+                {
+                    // Decrease the quantity of the product by one and update the database
+                    cart.ProductQuantity--;
+                }
+                else
+                {
+                    // If the quantity of the product is 1, remove the item from the cart
+                    _context.Remove(cart);
+                }
+
                 await _context.SaveChangesAsync();
             }
-
-            else
-            {
-                // If the quantity of the product is 1, remove the item from the cart
-                _context.Remove(cart);
-                await _context.SaveChangesAsync();
-            }
-
             // Redirect to the "Cart" action and remove the discount because the total order amount is changing
             return RedirectToAction("Cart", new
             {

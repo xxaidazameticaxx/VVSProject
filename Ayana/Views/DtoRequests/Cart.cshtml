@@ -1,4 +1,4 @@
-﻿@using System.Security.Claims;
+﻿﻿@using System.Security.Claims;
 @model Ayana.Models.DtoRequest
 @using Ayana.Data;
 
@@ -111,7 +111,8 @@
                                 <div style="padding: 10px;margin-left:20px">
 
                                     <a onclick="RemoveItem()" class="remove-button">Remove Item</a>
-                                    <input id="productKey" type="hidden" value="@product.ProductID">
+                                   <input id="productKey_@i" type="hidden" value="@product.ProductID">
+
 
 
                                     <a asp-area="" asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductID" style="-webkit-text-fill-color:black;">
@@ -142,7 +143,7 @@
                             <div style="display:flex; align-items:center">
                                 <input id="discountCodeInput" asp-for="@Model.discount.DiscountCode" class="form-control" value="@ViewBag.DiscountCode" style="width: 88%;" />
                                 <span class="input-group-append">
-                                    @if (string.IsNullOrWhiteSpace(ViewBag.DiscountCode) || ViewBag.DiscountCode == "Wrong code, try again..." || ViewBag.DiscountCode == "Code is expired...")
+                                    @if (string.IsNullOrWhiteSpace(ViewBag.DiscountCode) || ViewBag.DiscountCode == "Wrong code,try again..." || ViewBag.DiscountCode == "Code is expired...")
                                     {
                                         <button id="applyDiscountBtn" style="background-color: #f2b6c1; border:white;padding: 10px 20px; height:35px;border-radius: 5px; text-decoration: none; color: #fff; font-weight: bold">&#x2713;</button>
 
@@ -271,10 +272,14 @@
 
     }
 
+
     function RemoveItem() {
-        const prodId = document.getElementById('productKey').value;
+        const clickedElement = event.target;
+        const prodId = clickedElement.parentElement.querySelector('input[type="hidden"]').value;
+
         const parameters = new URLSearchParams();
         parameters.append("id", prodId);
+
         const url = "/DtoRequests/RemoveItem?" + parameters.toString();
 
         fetch(url)
@@ -289,6 +294,7 @@
                 console.log("Error removing item from cart:", error);
             });
     }
+
 
 
 
