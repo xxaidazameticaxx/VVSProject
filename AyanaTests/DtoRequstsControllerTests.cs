@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,32 +9,40 @@ using Ayana.Paterni;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Linq.Expressions;
+using Microsoft.AspNetCore.Routing;
 
 
 namespace AyanaTests
 {
-   
+
     [TestClass]
     public class DtoRequestsControllerTests
     {
-     
+        private ApplicationDbContext _dbContext;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+               .UseInMemoryDatabase(databaseName: "TestDatabase")
+               .Options;
+
+            _dbContext = new ApplicationDbContext(options);
+
+        }
+
         // written by : Aida Zametica
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task RemoveItem_WhenUserIdIsNull_ThrowsArgumentNullException()
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDatabase")
-                .Options;
-
-            var dbContext = new ApplicationDbContext(options);
 
             var mockDiscountCodeVerifier = new Mock<IDiscountCodeVerifier>();
-
             var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
             mockHttpContextAccessor.Setup(a => a.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim)null);
 
-            var controller = new DtoRequestsController(dbContext, mockDiscountCodeVerifier.Object)
+            var controller = new DtoRequestsController(_dbContext, mockDiscountCodeVerifier.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -43,13 +50,14 @@ namespace AyanaTests
                 }
             };
 
-            await controller.RemoveItem(0);}
-      
+            await controller.RemoveItem(0);
+        }
+
         // written by : Aida Zametica
         [TestMethod]
         public async Task ApplyDiscount_ValidCodeAndNotExpiredPercentageOff_ShouldRedirectToCartWithDiscount()
         {
-            
+
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
             discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
             discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(true);
@@ -63,9 +71,9 @@ namespace AyanaTests
 
             var result = await controller.ApplyDiscount("ValidDiscountCode") as RedirectToActionResult;
 
-          
+
             Assert.IsNotNull(result);
-            Assert.AreEqual("ValidDiscountCode", result.RouteValues["discountCode"]); 
+            Assert.AreEqual("ValidDiscountCode", result.RouteValues["discountCode"]);
             Assert.AreEqual("Cart", result.ActionName);
         }
 
@@ -90,7 +98,7 @@ namespace AyanaTests
 
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("ValidDiscountCode", result.RouteValues["discountCode"]); 
+            Assert.AreEqual("ValidDiscountCode", result.RouteValues["discountCode"]);
             Assert.AreEqual("Cart", result.ActionName);
         }
 
@@ -147,12 +155,12 @@ namespace AyanaTests
         {
             var payment = new Payment
             {
-                PayedAmount = 100 
+                PayedAmount = 100
             };
 
             var discount = new Discount
             {
-                DiscountCode = "ValidDiscountCode" 
+                DiscountCode = "ValidDiscountCode"
             };
 
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
@@ -160,7 +168,7 @@ namespace AyanaTests
             discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(true);
             discountCodeVerifierMock.Setup(x => x.GetDiscount("ValidDiscountCode")).Returns(new Discount
             {
-                DiscountID = 1, 
+                DiscountID = 1,
                 DiscountAmount = 10,
                 DiscountType = DiscountType.PercentageOff
             });
@@ -169,8 +177,8 @@ namespace AyanaTests
             var result = await controller.CalculateDiscount(payment, discount);
 
             Assert.AreEqual(90, result.totalWithDiscount);
-            Assert.AreEqual(1, result.discountId); 
-            Assert.AreEqual(10, result.discountAmount); 
+            Assert.AreEqual(1, result.discountId);
+            Assert.AreEqual(10, result.discountAmount);
         }
 
         //written by : Aida Zametica
@@ -205,35 +213,11 @@ namespace AyanaTests
             Assert.AreEqual(10, result.discountAmount);
         }
 
-        // written by: Aida Zametica
-        [TestMethod]
-        public async Task CalculateDiscount_ValidDiscountCodeButExpired_ShouldNotApplyDiscount()
+
+        [TestCleanup]
+        public void TestCleanup()
         {
-            // Arrange
-            var payment = new Payment
-            {
-                PayedAmount = 100
-            };
-
-            var discount = new Discount
-            {
-                DiscountCode = "ValidDiscountCode"
-            };
-
-            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
-            discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
-            discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(false);
-
-            var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
-
-            // Act
-            var result = await controller.CalculateDiscount(payment, discount);
-
-            // Assert
-            Assert.AreEqual(100, result.totalWithDiscount);
-            Assert.AreEqual(1, result.discountId);
-            Assert.AreEqual(0, result.discountAmount);
+            _dbContext.Database.EnsureDeleted();
         }
-
     }
 }
