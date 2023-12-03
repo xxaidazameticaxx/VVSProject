@@ -99,6 +99,30 @@ namespace AyanaTests
             Assert.AreEqual("UserOrders", redirectResult.ViewName, "The view name should be 'UserOrders'.");
         }
 
+        [TestMethod]
+        public async Task Edit_OrderIsNull_NotFoundResult()
+        {
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, "other"));
+
+            var result = await controller.Edit(new Order { OrderID = 3, Rating = null });
+
+            Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        }
+
+        /*
+         * ne radi :(
+        [TestMethod]
+        public async Task Edit_OrderIsNotNull_OrderRatingUpdated()
+        {
+            var result = await controller.Edit(new Order { OrderID = 1, Rating = 5 });
+
+            var updatedOrder = orderList.FirstOrDefault(o => o.OrderID == 1);
+
+            Assert.IsNotNull(updatedOrder, "The order should be updated.");
+            Assert.AreEqual(5, updatedOrder.Rating, "The order rating should be updated to 5.");
+        }
+        */
+
         [TestCleanup]
         public async Task TestCleanup()
         {
