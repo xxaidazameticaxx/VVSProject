@@ -54,7 +54,7 @@ namespace Ayana.Controllers
             ViewBag.OrderProducts = orderProducts;
 
             // Render the view
-            return View();
+            return View("UserOrders");
         }
 
         // POST: Orders/Edit/5
@@ -71,7 +71,7 @@ namespace Ayana.Controllers
             }
             existingOrder.Rating = order.Rating;
             await _context.SaveChangesAsync();
-            return Redirect("UserOrders/Orders");
+            return Redirect("UserOrders");
         }
     }
 }
