@@ -21,13 +21,13 @@ namespace Ayana.Data
 
         public virtual DbSet<Cart> Cart { get; set; }
 
-        public DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
         public DbSet<Discount> Discounts { get; set; }
         public DbSet<Payment> Payments { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
-        public DbSet<ProductOrder> ProductOrders { get; set; }
+        public virtual DbSet<ProductOrder> ProductOrders { get; set; }
 
         public DbSet<ProductSales> ProductSales { get; set; }
 
