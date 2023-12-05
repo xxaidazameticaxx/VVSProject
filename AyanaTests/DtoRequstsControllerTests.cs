@@ -7,7 +7,11 @@ using Ayana.Paterni;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using static System.Net.Mime.MediaTypeNames;
+using System.Linq.Expressions;
+using Microsoft.CodeAnalysis;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 
 namespace AyanaTests
@@ -68,9 +72,8 @@ namespace AyanaTests
 
             var result = await controller.RemoveItem(1);
 
-            Assert.IsInstanceOfType(result, typeof(Microsoft.AspNetCore.Mvc.RedirectToActionResult));
-
-            var redirectResult = (Microsoft.AspNetCore.Mvc.RedirectToActionResult)result;
+            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+            var redirectResult = (RedirectToActionResult)result;
             Assert.AreEqual("Cart", redirectResult.ActionName);
             Assert.AreEqual(0, redirectResult.RouteValues["discountAmount"]);
             Assert.AreEqual(1, redirectResult.RouteValues["discountType"]);
@@ -83,7 +86,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public async Task RemoveItem_WhenProductQuantityEquaOne_DecreasesQuantity()
+        public async Task RemoveItem_WhenProductQuantityEqualOne_DecreasesQuantity()
         {
 
             var userId = "testUserId";
@@ -138,7 +141,6 @@ namespace AyanaTests
         [ExpectedException(typeof(ArgumentNullException))]
         public async Task RemoveItem_WhenUserIdIsNull_ThrowsArgumentNullException()
         {
-            // creates a mock object for the IDiscountCodeVerifier interface
             var mockDiscountCodeVerifier = new Mock<IDiscountCodeVerifier>();
 
             var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
@@ -158,7 +160,9 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public async Task ApplyDiscount_ValidCodeAndNotExpiredPercentageOff_ShouldRedirectToCartWithDiscount()
+        [DataRow(0)]
+        [DataRow(1)]
+        public async Task ApplyDiscount_ValidCodeAndNotExpired_ShouldRedirectToCartWithDiscount(DiscountType discountType)
         {
 
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
@@ -167,7 +171,7 @@ namespace AyanaTests
             discountCodeVerifierMock.Setup(x => x.GetDiscount("ValidDiscountCode")).Returns(new Discount
             {
                 DiscountAmount = 10,
-                DiscountType = DiscountType.PercentageOff
+                DiscountType = discountType
             });
 
             var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
@@ -183,31 +187,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public async Task ApplyDiscount_ValidCodeAndNotExpiredAmountOff_ShouldRedirectToCartWithDiscount()
-        {
-
-            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
-            discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
-            discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(true);
-            discountCodeVerifierMock.Setup(x => x.GetDiscount("ValidDiscountCode")).Returns(new Discount
-            {
-                DiscountAmount = 10,
-                DiscountType = DiscountType.AmountOff
-            });
-
-            var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
-
-            var result = await controller.ApplyDiscount("ValidDiscountCode") as RedirectToActionResult;
-
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("ValidDiscountCode", result.RouteValues["discountCode"]);
-            Assert.AreEqual("Cart", result.ActionName);
-        }
-
-        // written by : Aida Zametica
-        [TestMethod]
-        public async Task ApplyDiscount_ValidCodeAndExpired_ShouldRedirectToCartWithDiscount()
+        public async Task ApplyDiscount_ValidCodeAndExpired_ShouldRedirectToCartWithoutDiscount()
         {
 
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
@@ -231,7 +211,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public async Task ApplyDiscount_InvalidCode_ShouldRedirectToCartWithDiscount()
+        public async Task ApplyDiscount_InvalidCode_ShouldRedirectToCartWithoutDiscount()
         {
 
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
@@ -254,7 +234,9 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public async Task CalculateDiscount_ValidDiscountType2AndNotExpired_ShouldApplyDiscountCorrectly()
+        [DataRow(0)]
+        [DataRow(1)]
+        public async Task CalculateDiscount_ValidDiscountAndNotExpired_ShouldApplyDiscountCorrectly(DiscountType discountType)
         {
             var payment = new Payment
             {
@@ -273,7 +255,7 @@ namespace AyanaTests
             {
                 DiscountID = 1,
                 DiscountAmount = 10,
-                DiscountType = DiscountType.PercentageOff
+                DiscountType = discountType
             });
             var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
 
@@ -284,46 +266,261 @@ namespace AyanaTests
             Assert.AreEqual(10, result.discountAmount);
         }
 
-        //written by : Aida Zametica
+        // written by : Aida Zametica
         [TestMethod]
-        public async Task CalculateDiscount_ValidDiscountType1AndNotExpired_ShouldApplyDiscountCorrectly()
+        public async Task AddToCart_WhenProductItemExists_IncreaseQuantity()
         {
-            var payment = new Payment
+     
+            var userId = "testUserId";
+            var productId = 1;
+
+            var cartList = new List<Cart>
             {
-                PayedAmount = 100
+                new Cart { CustomerID = userId, ProductID = 1, ProductQuantity = 1 },
+                new Cart { CustomerID = "otherUserId", ProductID = 2, ProductQuantity = 1 },
             };
 
-            var discount = new Discount
-            {
-                DiscountCode = "ValidDiscountCode"
-            };
+            var cartDbSetMock = new Mock<DbSet<Cart>>();
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.Provider).Returns(cartList.AsQueryable().Provider);
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.Expression).Returns(cartList.AsQueryable().Expression);
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.ElementType).Returns(cartList.AsQueryable().ElementType);
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.GetEnumerator()).Returns(cartList.GetEnumerator());
 
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
-            discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
-            discountCodeVerifierMock.Setup(x => x.VerifyExperationDate("ValidDiscountCode")).Returns(true);
-            discountCodeVerifierMock.Setup(x => x.GetDiscount("ValidDiscountCode")).Returns(new Discount
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
+
+            var controller = new DtoRequestsController(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            var userMock = new Mock<ClaimsPrincipal>();
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controller.ControllerContext = new ControllerContext
             {
-                DiscountID = 1,
-                DiscountAmount = 10,
-                DiscountType = DiscountType.AmountOff
-            });
-            var controller = new DtoRequestsController(null, discountCodeVerifierMock.Object);
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+            };
 
-            var result = await controller.CalculateDiscount(payment, discount);
+            var result = await controller.AddToCart(productId);
 
-            Assert.AreEqual(90, result.totalWithDiscount);
-            Assert.AreEqual(1, result.discountId);
-            Assert.AreEqual(10, result.discountAmount);
+            var existingCartItem = cartList.SingleOrDefault(c => c.CustomerID == userId && c.ProductID == productId);
+            Assert.IsNotNull(existingCartItem);
+            Assert.AreEqual(2, existingCartItem.ProductQuantity);
+
+            cartDbSetMock.Verify(d => d.Add(It.IsAny<Cart>()), Times.Never);
         }
 
+        // written by : Aida Zametica
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task AddToCart_WhenUserIdIsNull_ThrowsArgumentNullException()
+        {
+    
+            var mockDiscountCodeVerifier = new Mock<IDiscountCodeVerifier>();
+
+            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+
+            mockHttpContextAccessor.Setup(a => a.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim)null);
+
+            var controller = new DtoRequestsController(_dbContext, mockDiscountCodeVerifier.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal() }
+                }
+            };
+
+            await controller.AddToCart(1); 
+        }
+
+        // written by: Aida Zametica
+        [TestMethod]
+        public async Task AddToCart_WhenProductItemNotFound_CreateCart()
+        {
+
+            var userId = "testUserId";
+            var productId = 1;
+
+            var cartList = new List<Cart>
+            {
+                new Cart { CustomerID = "otherUserId", ProductID = 2, ProductQuantity = 1 },
+            };
+
+            var cartDbSetMock = new Mock<DbSet<Cart>>();
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.Provider).Returns(cartList.AsQueryable().Provider);
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.Expression).Returns(cartList.AsQueryable().Expression);
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.ElementType).Returns(cartList.AsQueryable().ElementType);
+            cartDbSetMock.As<IQueryable<Cart>>().Setup(m => m.GetEnumerator()).Returns(cartList.GetEnumerator());
+    
+
+            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
+
+            var controller = new DtoRequestsController(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            var userMock = new Mock<ClaimsPrincipal>();
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+            };
+
+            dbContextMock.
+             Setup(m => m.Add(It.IsAny<Cart>())).Callback<Cart>((entity) => cartList.Add(entity));
+
+            var result = await controller.AddToCart(productId);
+            Assert.AreEqual(2, cartList.Count);
+
+            var newCartItem = cartList.SingleOrDefault(c => c.CustomerID == userId && c.ProductID == productId);
+            Assert.AreEqual(1, newCartItem.ProductQuantity);
+        }
+
+        // written by : Aida Zametica
+        [TestMethod]
+        [DataRow(123, "Address123", 0)]
+        [DataRow(null,"Address456", 1)]
+        public async Task SavePaymentData_ShouldSavePaymentCorrectly(int? bankAccount, string deliveryAddress, PaymentType paymentType)
+        {
+
+            var mockDiscountCodeVerifier = new Mock<IDiscountCodeVerifier>();
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+
+            var controller = new DtoRequestsController(dbContextMock.Object, mockDiscountCodeVerifier.Object);
+
+            var payment = new Payment
+            {
+                BankAccount = bankAccount,
+                DeliveryAddress = deliveryAddress,
+                PaymentType =paymentType,
+            };
+
+            double totalWithDiscount = 50.0;
+            int? discountId = 1;
+
+
+            var result = await controller.SavePaymentData(payment, totalWithDiscount, discountId);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.BankAccount,bankAccount);
+            Assert.AreEqual(result.DeliveryAddress, deliveryAddress);
+            Assert.AreEqual(result.PaymentType, paymentType);
+            Assert.AreEqual(result.PayedAmount, totalWithDiscount);
+            Assert.AreEqual(result.DiscountID, discountId);
+        }
+
+        // written by : Aida Zametica
+        [TestMethod]
+        public async Task SaveOrderData_ShouldSaveOrderCorrectly()
+        {
+
+            var mockDiscountCodeVerifier = new Mock<IDiscountCodeVerifier>();
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+
+            var controller = new DtoRequestsController(dbContextMock.Object, mockDiscountCodeVerifier.Object);
+
+            double totalWithDiscount = 50.0;
+            string userId = "testUser";
+            Payment paymentForOrder = new Payment { PaymentID = 1 };
+
+            var order = new Order
+            {
+                DeliveryDate=new DateTime(),
+                personalMessage = "Test message"
+            };
+
+            var result = await controller.SaveOrderData(order, userId, paymentForOrder,totalWithDiscount);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.TotalAmountToPay, totalWithDiscount);
+            Assert.AreEqual(result.CustomerID, userId);
+            Assert.AreEqual(result.PaymentID,paymentForOrder.PaymentID);
+            Assert.IsFalse(result.IsOrderSent);
+            Assert.IsNull(result.Rating);
+        }
+
+        // written by : Aida Zametica
+        [TestMethod]
+        public void ThankYou_ReturnsViewWithOrderType()
+        {
+  
+            var orderType = "TestOrderType";
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
+            var controller = new DtoRequestsController(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            var result = controller.ThankYou(orderType) as ViewResult;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(orderType, result.ViewData["OrderType"]);
+        }
+
+        /*
+        // written by : Aida Zametica
+        [TestMethod]
+        public async Task OrderCreate_WithValidData_ReturnsRedirectToThankYou()
+        {
+            var userId = "testUserId";
+
+            var usersDbSetMock = new Mock<DbSet<ApplicationUser>>();
+            usersDbSetMock.As<IQueryable<ApplicationUser>>().Setup(m => m.Provider).Returns(userId.AsQueryable().Provider);
+            usersDbSetMock.As<IQueryable<ApplicationUser>>().Setup(m => m.Expression).Returns(userId.AsQueryable().Expression);
+            usersDbSetMock.As<IQueryable<ApplicationUser>>().Setup(m => m.ElementType).Returns(userId.AsQueryable().ElementType);
+            usersDbSetMock.As<IQueryable<ApplicationUser>>().Setup(m => m.GetEnumerator()).Returns(userId.GetEnumerator());
+ 
+            dbContextMock.Setup(c => c.Users).Returns(usersDbSetMock.Object);
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
+            var controller = new DtoRequestsController(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            var userMock = new Mock<ClaimsPrincipal>();
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+            };
+
+            var order = new Order {
+                OrderID = 1,
+                DeliveryDate = new DateTime(),
+                personalMessage = "Test message"
+            };
+
+            var discount = new Discount { 
+                DiscountID = 1,
+                DiscountCode = "ValidDiscountCode" 
+            };
+
+
+            var payment = new Payment
+            {
+                PaymentID = 1,
+    
+            };
+
+            var result = await controller.OrderCreate(order, payment, discount) as RedirectToActionResult;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("ThankYou", result.ActionName);
+            Assert.AreEqual("order", result.RouteValues["orderType"]);
+
+        }
+        */
 
 
         [TestCleanup]
         public async Task TestCleanup()
         {
             await _dbContext.Database.EnsureDeletedAsync();
+ 
         }
-
 
 
     }

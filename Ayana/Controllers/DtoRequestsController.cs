@@ -101,12 +101,13 @@ namespace Ayana.Controllers
 
         public async Task<IActionResult> AddToCart(int productId)
         {
+            
             // Get the ID of the currently logged-in user
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Check if the user is logged in
             if (userId == null)
-                return View("Error","Only registered users can buy our products. Sign up and enjoy our products");
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
 
             // Search the cart to see if there is already a product with the given ID for the current user
             var existingCartItem = _context.Cart.FirstOrDefault(o => o.CustomerID == userId && o.ProductID == productId);
@@ -173,10 +174,10 @@ namespace Ayana.Controllers
 
             // Get the ID of the currently logged-in user
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Check if the user is logged in
             if (userId == null)
-                return View("Error");
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
 
             // Get user-specific carts based on CustomerId
             List<Cart> userCarts = _context.Cart
@@ -262,7 +263,7 @@ namespace Ayana.Controllers
             return (totalWithDiscount, discountId, discountAmount);
         }
 
-        private async Task<Payment> SavePaymentData(Payment payment, double totalWithDiscount, int? discountId)
+         public async Task<Payment> SavePaymentData(Payment payment, double totalWithDiscount, int? discountId)
         {
             Payment paymentForOrder = new()
             {
@@ -279,7 +280,7 @@ namespace Ayana.Controllers
             return paymentForOrder;
         }
 
-        private async Task<Order> SaveOrderData(Order order, string userId, Payment paymentForOrder, double totalWithDiscount)
+        public async Task<Order> SaveOrderData(Order order, string userId, Payment paymentForOrder, double totalWithDiscount)
         {
             Order newOrder = new()
             {
@@ -299,7 +300,7 @@ namespace Ayana.Controllers
             return newOrder;
         }
 
-        private async Task ProcessCartItems(string userId, Order newOrder)
+        public async Task ProcessCartItems(string userId, Order newOrder)
         {
             List<Cart> userCarts = _context.Cart
                 .Where(o => o.CustomerID == userId)
@@ -356,8 +357,9 @@ namespace Ayana.Controllers
 
             if (userId == null)
             {
-                return View("~/Views/Shared/Error.cshtml");
+                throw new ArgumentNullException(nameof(userId));
             }
+
 
             // Total cart price without discount is added to the new order
             var totalWithoutDiscount = payment.PayedAmount;
@@ -379,6 +381,8 @@ namespace Ayana.Controllers
 
             return Redirect("/DtoRequests/ThankYou?orderType=order");
         }
+
+
 
 
         public IActionResult ThankYou(string orderType)
