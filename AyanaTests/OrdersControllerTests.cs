@@ -16,26 +16,15 @@ namespace AyanaTests
         private OrdersController controller;
         private List<Order> orderList;
         private Mock<ClaimsPrincipal> userMock;
-        private Order testOrder;
-        private int newRating = 5;
+        private Order testOrder = new Order { OrderID = 1, CustomerID = "userId", PaymentID = 1, purchaseDate = DateTime.Now, personalMessage = null, IsOrderSent = true, Rating = 5, TotalAmountToPay = 100, DeliveryDate = DateTime.Now.AddDays(2) };
 
         [TestInitialize]
         public void TestInitialize()
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-               .UseInMemoryDatabase(databaseName: "InMemoryDatabase")
-               .Options;
-
-            _dbContext = new ApplicationDbContext(options);
-
-            var userId = "userId";
-            var otherUserId = "other";
-
-            testOrder = new Order { OrderID = 1, CustomerID = userId, PaymentID = 1, purchaseDate = DateTime.Now, personalMessage = null, IsOrderSent = true, Rating = null, TotalAmountToPay = 100, DeliveryDate = DateTime.Now.AddDays(2) };
             orderList = new List<Order>
             {
                 testOrder,
-                new Order{OrderID = 2, CustomerID = otherUserId, PaymentID = 2, purchaseDate = DateTime.Now, personalMessage = "Happy birthday!", IsOrderSent = true, Rating = null, TotalAmountToPay = 50, DeliveryDate = DateTime.Now.AddDays(3)},
+                new Order{OrderID = 2, CustomerID = "other", PaymentID = 2, purchaseDate = DateTime.Now, personalMessage = "Happy birthday!", IsOrderSent = true, Rating = null, TotalAmountToPay = 50, DeliveryDate = DateTime.Now.AddDays(3)},
 
             };
 
@@ -61,8 +50,8 @@ namespace AyanaTests
 
             var productOrderList = new List<ProductOrder>
             {
-                new ProductOrder { ProductOrderID = 1, OrderID = 1, ProductID = 1, ProductQuantity = 2 , Order = null},
-                new ProductOrder { ProductOrderID = 2, OrderID = 2, ProductID = 2, ProductQuantity = 1 , Order = null}
+                new ProductOrder { ProductOrderID = 1, OrderID = 1, ProductID = 1, ProductQuantity = 2 },
+                new ProductOrder { ProductOrderID = 2, OrderID = 2, ProductID = 2, ProductQuantity = 1 }
             };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
@@ -88,13 +77,13 @@ namespace AyanaTests
               {
                   foreach (var order in orderList)
                   {
-                      if (order.OrderID == 1)
+                      if (order.OrderID == testOrder.OrderID)
                       {
-                          order.Rating = newRating;
+                          order.Rating = testOrder.Rating;
                       }
                   }
               })
-              .Returns(Task.FromResult(0)); 
+              .Returns(Task.FromResult(0));
 
 
 
@@ -112,7 +101,6 @@ namespace AyanaTests
         [TestMethod]
         public void GetOrderProducts_OrderIsNotNull_ShouldOpenViewWithCorrectUserOrders()
         {
-
             userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, "userId"));
 
             var result = controller.UserOrders();
@@ -141,20 +129,12 @@ namespace AyanaTests
         [TestMethod]
         public async Task Edit_OrderIsNotNull_OrderRatingUpdated()
         {
-           
             var result = await controller.Edit(testOrder);
 
             var updatedOrder = orderList.FirstOrDefault(o => o.OrderID == 1);
 
             Assert.IsNotNull(updatedOrder, "The order should be updated.");
-            Assert.AreEqual(newRating, updatedOrder.Rating, "The order rating should be updated to 5.");
-        }
-        
-
-        [TestCleanup]
-        public async Task TestCleanup()
-        {
-            await _dbContext.Database.EnsureDeletedAsync();
+            Assert.AreEqual(testOrder.Rating, updatedOrder.Rating, "The order rating should be updated to 5.");
         }
     }
 }
