@@ -5,11 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using Ayana.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Drawing.Printing;
-using Ayana.Paterni;
+
 
 namespace Ayana.Controllers
 {
@@ -17,7 +14,7 @@ namespace Ayana.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
-        public  UserState _userState;
+        public  UserState UserState;
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
             _logger = logger;
@@ -40,9 +37,9 @@ namespace Ayana.Controllers
 
         public IActionResult Index()
         {
-            _userState = new UserState();
-            bestSellers();
-            birthdayBestSellers();
+            UserState = new UserState();
+            BestSellers();
+            BirthdayBestSellers();
             return View();
         }
 
@@ -70,7 +67,7 @@ namespace Ayana.Controllers
         }
         public IActionResult AboutUs()
         {
-            overallRating();
+            OverallRating();
             return View();
         }
         public IActionResult Subscription()
@@ -78,19 +75,19 @@ namespace Ayana.Controllers
             return View();
         }
 
-        public void overallRating(){ 
+        public void OverallRating(){ 
        
             List<Order> orders = _context.Orders.ToList();
 
             double? rating = 0;
             int temp = 0;
 
-            for (int i = 0; i < orders.Count; i++)
+            foreach (Order o in orders)
             {
-                if (orders[i].Rating != null)
+                if (o.Rating != null)
                 {
                     temp++;
-                    rating += orders[i].Rating;
+                    rating += o.Rating;
                 }
             }
             if (temp != 0)
@@ -99,25 +96,25 @@ namespace Ayana.Controllers
                
             Console.WriteLine(rating);
         }
-        public void bestSellers()
+        public void BestSellers()
         {
             List<Product> orderded = _context.Products.ToList();
            
            orderded= orderded.OrderByDescending(x => x.Price).ToList(); //TODO
-            List<Product> bestSellers = new List<Product>();
+            List<Product> BestSellers = new List<Product>();
             for(int i = 0; i < 3; i++)
-                bestSellers.Add(orderded[i]);
-                ViewBag.bestSellers = bestSellers;
-            Console.WriteLine(bestSellers);
+                BestSellers.Add(orderded[i]);
+            ViewBag.BestSellers = BestSellers;
+            Console.WriteLine(BestSellers);
         }
-        public void birthdayBestSellers()
+        public void BirthdayBestSellers()
         {
             List<Product> birthdayList = _context.Products.ToList().FindAll(x => x.Category == "Birthday");
            birthdayList= birthdayList.OrderByDescending(x=>x.Price).ToList();//TODO
             List<Product> birthdayBestSeller = new List<Product>();
             for (int i = 0; i < 3; i++)
               birthdayBestSeller.Insert(i, birthdayList[i]);
-            ViewBag.birthdayBestSellers = birthdayBestSeller;
+            ViewBag.BirthdayBestSellers = birthdayBestSeller;
         }
 
         public List<Product> Category(string category1)
