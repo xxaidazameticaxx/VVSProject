@@ -141,7 +141,7 @@ namespace Ayana.Controllers
         }
 
 
-        public List<List<Product>> GetCartProducts(List<Cart> carts)
+        public virtual List<List<Product>> GetCartProducts(List<Cart> carts)
         {
             // List that will contain a list of products for each cart
             List<List<Product>> cartProducts = new();
@@ -172,12 +172,7 @@ namespace Ayana.Controllers
             // Parse values for the discount type
             int intDiscountType = int.Parse(discountType);
 
-            // Get the ID of the currently logged-in user
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null)
-            {
-                throw new ArgumentNullException(nameof(userId));
-            }
 
             // Get user-specific carts based on CustomerId
             List<Cart> userCarts = _context.Cart
@@ -203,7 +198,11 @@ namespace Ayana.Controllers
                 foreach (var product in products)
                 {
                     // Add the product price multiplied by the quantity to the total amount
-                    amountToPayWithoutDiscount += (double)(product.Price * cart.ProductQuantity);
+                    if (cart != null)
+                    {
+                        if(product!=null)
+                        amountToPayWithoutDiscount += (double)(product.Price * cart.ProductQuantity);
+                    }
                 }
             }
 
@@ -224,10 +223,10 @@ namespace Ayana.Controllers
             // Pass the amount to be paid to the view
             ViewBag.TotalAmountToPay = amountToPayWithDiscount;
 
-            return View();
+            return View("Cart");
         }
 
-        public async Task<(double totalWithDiscount, int? discountId, double? discountAmount)> CalculateDiscount(Payment payment, Discount discount)
+        public virtual async Task<(double totalWithDiscount, int? discountId, double? discountAmount)> CalculateDiscount(Payment payment, Discount discount)
         {
            
             int? discountId = null;
@@ -263,7 +262,7 @@ namespace Ayana.Controllers
             return (totalWithDiscount, discountId, discountAmount);
         }
 
-         public async Task<Payment> SavePaymentData(Payment payment, double totalWithDiscount, int? discountId)
+         public async virtual Task<Payment> SavePaymentData(Payment payment, double totalWithDiscount, int? discountId)
         {
             Payment paymentForOrder = new()
             {
@@ -280,7 +279,7 @@ namespace Ayana.Controllers
             return paymentForOrder;
         }
 
-        public async Task<Order> SaveOrderData(Order order, string userId, Payment paymentForOrder, double totalWithDiscount)
+        public async virtual Task<Order> SaveOrderData(Order order, string userId, Payment paymentForOrder, double totalWithDiscount)
         {
             Order newOrder = new()
             {
@@ -300,7 +299,7 @@ namespace Ayana.Controllers
             return newOrder;
         }
 
-        public async Task ProcessCartItems(string userId, Order newOrder)
+        public async virtual Task ProcessCartItems(string userId, Order newOrder)
         {
             List<Cart> userCarts = _context.Cart
                 .Where(o => o.CustomerID == userId)
@@ -347,7 +346,7 @@ namespace Ayana.Controllers
             _context.SaveChanges();
         }
 
-        public async Task<IActionResult> OrderCreate([Bind("Name,Price,personalMessage,DeliveryDate")] Order order, [Bind("DeliveryAddress,BankAccount,PaymentType,PayedAmount")] Payment payment, [Bind("DiscountCode")] Discount discount)
+        public async virtual Task<IActionResult> OrderCreate([Bind("Name,Price,personalMessage,DeliveryDate")] Order order, [Bind("DeliveryAddress,BankAccount,PaymentType,PayedAmount")] Payment payment, [Bind("DiscountCode")] Discount discount)
         {
             // Get the ID of the currently logged-in user
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -359,7 +358,6 @@ namespace Ayana.Controllers
             {
                 throw new ArgumentNullException(nameof(userId));
             }
-
 
             // Total cart price without discount is added to the new order
             var totalWithoutDiscount = payment.PayedAmount;
@@ -382,16 +380,11 @@ namespace Ayana.Controllers
             return Redirect("/DtoRequests/ThankYou?orderType=order");
         }
 
-
-
-
         public IActionResult ThankYou(string orderType)
         {
             ViewBag.OrderType = orderType;
             return View();
         }
+
     }
 }
-
-
-
