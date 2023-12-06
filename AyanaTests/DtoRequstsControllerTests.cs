@@ -7,6 +7,7 @@ using Ayana.Paterni;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.ComponentModel;
 
 namespace AyanaTests
 {
@@ -198,12 +199,16 @@ namespace AyanaTests
         {
             var payment = new Payment
             {
-                PayedAmount = 100
+                PayedAmount = 100,
+                Discount = null // zbog pokrivenosti
             };
 
             var discount = new Discount
             {
-                DiscountCode = "ValidDiscountCode"
+                DiscountCode = "ValidDiscountCode",
+                DiscountBegins = new DateTime(), // zbog pokrivenosti
+                DiscountEnds = new DateTime(), // zbog pokrivenosti
+
             };
 
             discountCodeVerifierMock.Setup(x => x.VerifyDiscountCode("ValidDiscountCode")).Returns(true);
@@ -390,7 +395,7 @@ namespace AyanaTests
                     foreach (var cart in carts)
                     {
                         var products = cart.ProductID == 1
-                            ? new List<Product> { new Product { ProductID = 1, Price = 20 } }
+                            ? new List<Product> { new Product { ProductID = 1, Name = "testProduct", ImageUrl = "testImageUrl", FlowerType = "testFlowerType", Stock = 0, Category = "testCategory",Description="testDescription",productType="testProductType", Price = 20 } }
                             : new List<Product>();
 
                         cartProducts.Add(products);
@@ -423,14 +428,14 @@ namespace AyanaTests
         [TestMethod]
         public void GetCartProducts_ReturnsListOfProductsForEachCart()
         {
-            var product1 = new Product { ProductID = 1, Price = 20 };
+            var product1 = new Product{ ProductID = 1, Price = 20  };
             var product2 = new Product { ProductID = 2, Price = 30 };
 
 
             var cartList = new List<Cart>
             {
-                new Cart { CartID = 1, CustomerID = userId, ProductID = 1,Product = product1, ProductQuantity = 1 },
-                new Cart { CartID = 2, CustomerID = userId, ProductID = 2,Product = product2, ProductQuantity = 1 },
+                new Cart { CartID = 1, CustomerID = userId, ProductID = 1,Product = product1, ProductQuantity = 1, Customer = null },
+                new Cart { CartID = 2, CustomerID = userId, ProductID = 2,Product = product2, ProductQuantity = 1, Customer = null },
             };
 
             var cartDbSetMock = GetDbSetMock(cartList);
@@ -450,11 +455,12 @@ namespace AyanaTests
         {
             var userList = new List<ApplicationUser>
             {
-                new ApplicationUser { Id = userId },
+                new ApplicationUser { Id = userId , FullName = "testUser", EmailAddress = "testAddress", AyanaUsername = "test", Password = "testPassword"},
                 new ApplicationUser { Id = "otherUserId" },
             };
 
-            var userDbSetMock = GetDbSetMock(userList);
+                    
+        var userDbSetMock = GetDbSetMock(userList);
 
             dbContextMock.Setup(d => d.Users).Returns(userDbSetMock.Object);
 
@@ -569,7 +575,7 @@ namespace AyanaTests
                 new Cart { CartID = 2, CustomerID = userId, ProductID = 2, Product = product2, ProductQuantity = 1 },
             };
 
-            var order = new Order { OrderID = 123 };
+            var order = new Order { OrderID = 123, Customer = null, Payment = null };
 
             var cartDbSetMock = GetDbSetMock(cartList);
 

@@ -26,14 +26,12 @@ namespace Ayana.Data
         public virtual DbSet<Payment> Payments { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public DbSet<Report> Reports { get; set; }
-        public DbSet<Subscription> Subscriptions { get; set; }
+        //public DbSet<Subscription> Subscriptions { get; set; }
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
 
         public DbSet<ProductSales> ProductSales { get; set; }
 
         public DbSet<DtoRequest> DtoRequest { get; set; }
-
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,7 +43,7 @@ namespace Ayana.Data
             modelBuilder.Entity<Cart>().ToTable("Carts");
             modelBuilder.Entity<Product>().ToTable("Products");
             modelBuilder.Entity<Report>().ToTable("Reports");
-            modelBuilder.Entity<Subscription>().ToTable("Subscriptions");
+            //modelBuilder.Entity<Subscription>().ToTable("Subscriptions");
             modelBuilder.Entity<ProductOrder>().ToTable("ProductOrders");
             modelBuilder.Entity<ProductSales>().ToTable("ProductSales");
 
@@ -60,16 +58,6 @@ namespace Ayana.Data
 
             base.OnModelCreating(modelBuilder);
         }
-
-
-       
-           
-        
-
-
-        
-
-
 
     }
 }

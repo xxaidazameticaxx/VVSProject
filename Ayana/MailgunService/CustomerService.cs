@@ -19,7 +19,6 @@ namespace Ayana.MailgunService
         {
             var cutoffDate = DateTime.Now.AddDays(30); // Get customers inactive for 30 days or more
             var orders=_context.Orders.Where(x=>x.purchaseDate<=cutoffDate).ToList();
-            Console.WriteLine("Uslo");
             var inactiveCustomers = _context.Users.Where(x => orders.Any(a => a.CustomerID == x.Id)).ToList();
             return inactiveCustomers;
         }

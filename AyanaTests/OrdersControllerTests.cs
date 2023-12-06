@@ -19,7 +19,7 @@ namespace AyanaTests
 
         [TestInitialize]
         public void TestInitialize()
-        { 
+        {
             orderList = new List<Order>
             {
                 testOrder,
