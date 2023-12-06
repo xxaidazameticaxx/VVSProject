@@ -16,6 +16,8 @@ namespace AyanaTests
         private OrdersController controller;
         private List<Order> orderList;
         private Mock<ClaimsPrincipal> userMock;
+        private Order testOrder;
+        private int newRating = 5;
 
         [TestInitialize]
         public void TestInitialize()
@@ -29,10 +31,12 @@ namespace AyanaTests
             var userId = "userId";
             var otherUserId = "other";
 
+            testOrder = new Order { OrderID = 1, CustomerID = userId, PaymentID = 1, purchaseDate = DateTime.Now, personalMessage = null, IsOrderSent = true, Rating = null, TotalAmountToPay = 100, DeliveryDate = DateTime.Now.AddDays(2) };
             orderList = new List<Order>
             {
-                new Order{OrderID = 1, CustomerID = userId, PaymentID = 1, purchaseDate = DateTime.Now, personalMessage = null, IsOrderSent = true, Rating = null, TotalAmountToPay = 100, DeliveryDate = DateTime.Now.AddDays(2)},
-                new Order{OrderID = 2, CustomerID = otherUserId, PaymentID = 2, purchaseDate = DateTime.Now, personalMessage = "Happy birthday!", IsOrderSent = true, Rating = null, TotalAmountToPay = 50, DeliveryDate = DateTime.Now.AddDays(3)}
+                testOrder,
+                new Order{OrderID = 2, CustomerID = otherUserId, PaymentID = 2, purchaseDate = DateTime.Now, personalMessage = "Happy birthday!", IsOrderSent = true, Rating = null, TotalAmountToPay = 50, DeliveryDate = DateTime.Now.AddDays(3)},
+
             };
 
             var orderDbSetMock = new Mock<DbSet<Order>>();
@@ -40,6 +44,14 @@ namespace AyanaTests
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(orderList.GetEnumerator());
+
+            orderDbSetMock.Setup(m => m.FindAsync(It.IsAny<object[]>()))
+               .Returns<object[]>(async keyValues =>
+               {
+                   var id = (int)keyValues[0];
+                   return await Task.FromResult(orderList.FirstOrDefault(o => o.OrderID == id));
+               });
+
 
             var productList = new List<Product>
             {
@@ -49,8 +61,8 @@ namespace AyanaTests
 
             var productOrderList = new List<ProductOrder>
             {
-                new ProductOrder { ProductOrderID = 1, OrderID = 1, ProductID = 1, ProductQuantity = 2 },
-                new ProductOrder { ProductOrderID = 2, OrderID = 2, ProductID = 2, ProductQuantity = 1 }
+                new ProductOrder { ProductOrderID = 1, OrderID = 1, ProductID = 1, ProductQuantity = 2 , Order = null},
+                new ProductOrder { ProductOrderID = 2, OrderID = 2, ProductID = 2, ProductQuantity = 1 , Order = null}
             };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
@@ -69,6 +81,23 @@ namespace AyanaTests
             dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
             dbContextMock.Setup(d => d.Products).Returns(productDbSetMock.Object);
             dbContextMock.Setup(d => d.ProductOrders).Returns(productOrderDbSetMock.Object);
+
+
+            dbContextMock.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()))
+              .Callback(async (CancellationToken cancellationToken) =>
+              {
+                  foreach (var order in orderList)
+                  {
+                      if (order.OrderID == 1)
+                      {
+                          order.Rating = newRating;
+                      }
+                  }
+              })
+              .Returns(Task.FromResult(0)); 
+
+
+
 
             controller = new OrdersController(dbContextMock.Object);
 
@@ -109,19 +138,18 @@ namespace AyanaTests
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
-        /*
-         * ne radi :(
         [TestMethod]
         public async Task Edit_OrderIsNotNull_OrderRatingUpdated()
         {
-            var result = await controller.Edit(new Order { OrderID = 1, Rating = 5 });
+           
+            var result = await controller.Edit(testOrder);
 
             var updatedOrder = orderList.FirstOrDefault(o => o.OrderID == 1);
 
             Assert.IsNotNull(updatedOrder, "The order should be updated.");
-            Assert.AreEqual(5, updatedOrder.Rating, "The order rating should be updated to 5.");
+            Assert.AreEqual(newRating, updatedOrder.Rating, "The order rating should be updated to 5.");
         }
-        */
+        
 
         [TestCleanup]
         public async Task TestCleanup()

@@ -11,7 +11,6 @@ namespace Ayana.Models
 
         public DateTime SalesDate { get; set; }
 
-
         [ForeignKey("Product")]
         public int ProductID { get; set; }
         public Product Product { get; set; }
