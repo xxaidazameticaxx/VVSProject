@@ -25,7 +25,7 @@ namespace Ayana.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            return View(_context.Products.AsAsyncEnumerable());
         }
 
 
@@ -76,7 +76,7 @@ namespace Ayana.Controllers
             if (isItBam)
             {
                 int o = int.Parse(popularSearch.Substring(4).Split(".").First());
-                List<Product> inPriceRange = products.FindAll(p => p.Price <= o);
+                List<Product> inPriceRange = products.FindAll(product => product.Price <= o);
                 ViewBag.p = inPriceRange;
             }
             else
