@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace Ayana.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(_context.Products.AsAsyncEnumerable());
+            return View(_context.Products.Where(x=>true).ToList());
         }
 
 
@@ -38,8 +39,8 @@ namespace Ayana.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.ProductID == id);
+            var product =  _context.Products
+                .FirstOrDefault(m => m.ProductID == id);
             if (product == null)
             {
                 return NotFound();
@@ -80,13 +81,12 @@ namespace Ayana.Controllers
                 ViewBag.p = inPriceRange;
             }
             else
-            {
-                List<Product> categoryList = _context.Products.ToList().FindAll(x => x.Category.ToLower() == popularSearch.ToLower());
+            {   
+                List<Product> categoryList = _context.Products.Where(x => x.Category.ToLower() == popularSearch.ToLower()).ToList();
 
                 if (categoryList.Count == 0)
                 {
-                    categoryList = _context.Products.ToList()
-                        .FindAll(x => x.FlowerType != null && x.FlowerType.ToLower() == popularSearch.ToLower());
+                    categoryList = _context.Products.Where(x => x.FlowerType != null && x.FlowerType.ToLower() == popularSearch.ToLower()).ToList();
 
                 }
                 ViewBag.String = popularSearch;
@@ -128,12 +128,12 @@ namespace Ayana.Controllers
                 if (!searchResults.Any())
                 {
                     string pattern = $"{Regex.Escape(String)}";
-                    searchResults = _context.Products.ToList().Where(p => Regex.IsMatch(p.Name, pattern, RegexOptions.IgnoreCase)).ToList();
+                    searchResults = _context.Products.Where(p => Regex.IsMatch(p.Name, pattern, RegexOptions.IgnoreCase)).ToList();
                 }
             }
 
             else
-                searchResults = _context.Products.ToList();
+                searchResults = _context.Products.Where(x=>true).ToList();
 
             ViewBag.String = String;
             var sortedProducts = sortStrategy.Sort(searchResults);
@@ -207,7 +207,7 @@ namespace Ayana.Controllers
                         throw;
                     }
                 }
-                var allProducts = _context.Products.ToList();
+                var allProducts = _context.Products.Where(x=>true).ToList();
                 return View("~/Views/Home/Index.cshtml", allProducts);
             }
 
@@ -260,8 +260,8 @@ namespace Ayana.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.ProductID == id);
+            var product = _context.Products
+                .FirstOrDefault(m => m.ProductID == id);
             if (product == null)
             {
                 return NotFound();
@@ -283,7 +283,7 @@ namespace Ayana.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        public bool ProductExists(int id)
         {
             return _context.Products.Any(e => e.ProductID == id);
         }
