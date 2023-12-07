@@ -198,14 +198,7 @@ namespace Ayana.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.ProductID))
-                    {
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
                 }
                 var allProducts = _context.Products.Where(x=>true).ToList();
                 return View("~/Views/Home/Index.cshtml", allProducts);
@@ -232,23 +225,14 @@ namespace Ayana.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.ProductID))
-                    {
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
                 }
-                var allProducts = _context.Products.ToList();
+                var allProducts = _context.Products.Where(x => true).ToList();
                 return View("~/Views/Home/Index.cshtml", allProducts);
             }
 
             return View("~/Views/Home/Index.cshtml");
         }
-
-
 
         // GET: Products/Delete/5
         [Authorize(Roles = "Employee")]

@@ -91,8 +91,41 @@ namespace AyanaTests
             dbContextMock.Setup(d => d.Remove(It.IsAny<Product>()))
                 .Callback<Product>(product => testData.Remove(product));
 
-            iProductMock.Setup(m => m.EditAll(It.IsAny<Product>()))
-                .Throws(new DbUpdateConcurrencyException());
+            iProductMock.Setup(editor => editor.EditAll(It.IsAny<Product>()))
+                .Callback<Product>(editedProduct =>
+                {
+                    // Implementirajte potrebnu logiku za uređivanje u mocku
+                    var existingProduct = testData.FirstOrDefault(p => p.ProductID == editedProduct.ProductID);
+                    if (existingProduct != null)
+                    {
+                        // Ovdje možete implementirati logiku uređivanja proizvoda
+                        existingProduct.Name = editedProduct.Name;
+                        existingProduct.Price = editedProduct.Price;
+                        // Ostale atribute...
+                    }
+                    else
+                    {
+                        throw new DbUpdateConcurrencyException();
+                    }
+                });
+
+            iProductMock.Setup(editor => editor.EditNameAndPrice(It.IsAny<int>(), It.IsAny<Product>()))
+                .Callback<int, Product>((productId, editedProduct) =>
+                {
+                    // Implementirajte potrebnu logiku za uređivanje imena i cijene u mocku
+                    var existingProduct = testData.FirstOrDefault(p => p.ProductID == productId);
+                    if (existingProduct != null)
+                    {
+                        // Ovdje možete implementirati logiku uređivanja imena i cijene proizvoda
+                        existingProduct.Name = editedProduct.Name;
+                        existingProduct.Price = editedProduct.Price;
+                        // Ostali atributi...
+                    }
+                    else
+                    {
+                        throw new DbUpdateConcurrencyException();
+                    }
+                });
 
             controller = new ProductsController(dbContextMock.Object, iProductMock.Object);
         }
@@ -509,6 +542,95 @@ namespace AyanaTests
             var model = viewResult.Model as List<Product>;
             Assert.IsNotNull(model);
             // Provjerite možda ovisno o implementaciji, model treba sadržavati izmijenjene proizvode.
+        }
+
+        [TestMethod]
+        public async Task Edit_ShouldReturnViewWithAllProducts_WhenProductIsNull()
+        {
+            // Arrange
+            int id = -1; // ID koji postoji u testnim podacima
+
+            var product = new Product
+            {
+                ProductID = -1,
+                Name = "Product 2",
+                ImageUrl = "url2",
+                Price = 29.99,
+                FlowerType = "Lily",
+                Stock = 15,
+                Category = "Flowers",
+                Description = "Elegant white lily",
+                productType = "Type B"
+            };
+
+            // Act
+            var result = await controller.Edit(id, product);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        }
+
+        [TestMethod]
+        public async Task EditNameAndPrice_ReturnsViewWithProduct_WhenProductDoesntExist_ModelStateIsntValid()
+        {
+            int nonExistingProductId = 100;
+            
+            var result = await controller.EditNameAndPrice(nonExistingProductId, testData[0]);
+            Assert.IsInstanceOfType(result,typeof(NotFoundResult));
+
+            controller.ModelState.AddModelError("Price", "Price must be greater than zero.");
+            var result1 = await controller.EditNameAndPrice(testData[0].ProductID, testData[0]);
+
+            Assert.IsInstanceOfType(result1, typeof(ViewResult));
+
+            var viewResult = (ViewResult)result1;
+            Assert.AreEqual("~/Views/Home/Index.cshtml", viewResult.ViewName);
+        }
+
+        [TestMethod]
+        public async Task EditNameAndPrice_ShouldReturnViewWithAllProducts_WhenEditIsSuccessful()
+        {
+            // Arrange
+            int id = 1; // ID koji postoji u testnim podacima
+
+            // Act
+            var result = await controller.EditNameAndPrice(id, testData[0]);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+            var viewResult = (ViewResult)result;
+            Assert.AreEqual("~/Views/Home/Index.cshtml", viewResult.ViewName);
+
+            var model = viewResult.Model as List<Product>;
+            Assert.IsNotNull(model);
+            // Provjerite možda ovisno o implementaciji, model treba sadržavati izmijenjene proizvode.
+        }
+
+        [TestMethod]
+        public async Task EditNameAndPrice_ShouldReturnViewWithAllProducts_WhenProductIsNull()
+        {
+            // Arrange
+            int id = -1; // ID koji postoji u testnim podacima
+
+            var product = new Product
+            {
+                ProductID = -1,
+                Name = "Product 2",
+                ImageUrl = "url2",
+                Price = 29.99,
+                FlowerType = "Lily",
+                Stock = 15,
+                Category = "Flowers",
+                Description = "Elegant white lily",
+                productType = "Type B"
+            };
+
+            // Act
+            var result = await controller.EditNameAndPrice(id, product);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
         [TestMethod]
