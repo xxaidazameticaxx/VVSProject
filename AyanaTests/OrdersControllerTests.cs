@@ -43,8 +43,8 @@ namespace AyanaTests
 
             var productList = new List<Product>
             {
-                new Product { ProductID = 1, Name = "Rose", Price = 10.0, Stock = 50 },
-                new Product { ProductID = 2, Name = "Lily", Price = 8.0, Stock = 30 }
+                new Product { ProductID = 1, Name = "Rose", Price = 10.0, Stock = 50, Category = "Type A", Description = "Perfect Pink roses", FlowerType = "roses", ImageUrl = "", productType = "Bouquet"},
+                new Product { ProductID = 2, Name = "Lily", Price = 8.0, Stock = 30, Category = "Type A", Description = "White lilies", FlowerType = "lily", ImageUrl = "", productType = "Bouquet" }
             };
 
             var productOrderList = new List<ProductOrder>
