@@ -49,7 +49,7 @@ namespace Ayana.Patterns
 
         public List<Product> GetAllProducts()
         {
-            return _context.Products.ToList();
+            return _context.Products.Where(x => true).ToList();
         }
     }
 }

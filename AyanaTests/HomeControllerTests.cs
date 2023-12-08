@@ -17,6 +17,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.ComponentModel;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace AyanaTests
 {
@@ -32,6 +36,8 @@ namespace AyanaTests
             _dbContextMock = new Mock<ApplicationDbContext>();
             _controller = new HomeController(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
         }
+
+
 
         // written by : Ilhan Hasičić
         [TestMethod]
@@ -398,6 +404,10 @@ namespace AyanaTests
   
             Assert.AreEqual(0, result);
         }
+
+       
+
+
 
         /*
         [TestMethod]
