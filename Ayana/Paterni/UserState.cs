@@ -7,7 +7,7 @@ public class UserState
 
     public UserState()
     {
-        _currentState = new GuestState(); // Initialize with the Guest state
+        _currentState = new GuestState(); 
     }
 
     public void SetState(IMode state)
