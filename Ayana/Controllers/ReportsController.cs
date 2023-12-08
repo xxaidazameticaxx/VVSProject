@@ -1,9 +1,5 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using Ayana.Data;
-using Ayana.Models;
 using Microsoft.AspNetCore.Authorization;
 using Ayana.Paterni;
 

@@ -29,7 +29,7 @@ namespace Ayana.Data
         //public DbSet<Subscription> Subscriptions { get; set; }
         public virtual DbSet<ProductOrder> ProductOrders { get; set; }
 
-        public DbSet<ProductSales> ProductSales { get; set; }
+        public virtual DbSet<ProductSales> ProductSales { get; set; }
 
         public DbSet<DtoRequest> DtoRequest { get; set; }
 
