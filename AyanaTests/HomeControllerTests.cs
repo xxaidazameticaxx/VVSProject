@@ -33,6 +33,7 @@ namespace AyanaTests
             _controller = new HomeController(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
         }
 
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void CategoryView_ShouldReturnFilteredProducts()
         {
@@ -40,11 +41,11 @@ namespace AyanaTests
             var category = "Birthday";
             var flowerType = "Rose";
             var productList = new List<Product>
-    {
-        new Product { ProductID = 1, Name = "Product1", Category = "Birthday", FlowerType = "Rose" },
-        new Product { ProductID = 2, Name = "Product2", Category = "Birthday", FlowerType = "Lily" },
-        new Product { ProductID = 3, Name = "Product3", Category = "Anniversary", FlowerType = "Rose" },
-    };
+            {
+                new Product { ProductID = 1, Name = "Product1", Category = "Birthday", FlowerType = "Rose" },
+                new Product { ProductID = 2, Name = "Product2", Category = "Birthday", FlowerType = "Lily" },
+                new Product { ProductID = 3, Name = "Product3", Category = "Anniversary", FlowerType = "Rose" },
+            };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
             productDbSetMock.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productList.AsQueryable().Provider);
@@ -70,7 +71,7 @@ namespace AyanaTests
             Assert.IsTrue(filteredProducts.All(p => p.Category == category || (p.FlowerType != null && p.FlowerType == flowerType)), "All products should match the category and/or flower type");
         }
 
-
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void BestSellers_ShouldReturnTop3ProductsByPrice()
         {
@@ -107,17 +108,18 @@ namespace AyanaTests
             Assert.AreEqual(18.0, result[2].Price, "Third product should have the third-highest price");
         }
 
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void BirthdayBestSellers_ShouldReturnTop3BirthdayBestSellingProducts()
         {
             // Arrange
             var productList = new List<Product>
-    {
-        new Product { ProductID = 1, Name = "Product1", Category = "Birthday", Price = 20 },
-        new Product { ProductID = 2, Name = "Product2", Category = "Birthday", Price = 15 },
-        new Product { ProductID = 3, Name = "Product3", Category = "Birthday", Price = 25 },
-        new Product { ProductID = 4, Name = "Product4", Category = "OtherCategory", Price = 10 },
-    };
+            {
+                new Product { ProductID = 1, Name = "Product1", Category = "Birthday", Price = 20 },
+                new Product { ProductID = 2, Name = "Product2", Category = "Birthday", Price = 15 },
+                new Product { ProductID = 3, Name = "Product3", Category = "Birthday", Price = 25 },
+                new Product { ProductID = 4, Name = "Product4", Category = "OtherCategory", Price = 10 },
+            };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
             productDbSetMock.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productList.AsQueryable().Provider);
@@ -139,6 +141,7 @@ namespace AyanaTests
             Assert.AreEqual(3, result.Count, "Should return top 3 birthday best-selling products");
         }
 
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void OverallRating_ShouldCalculateAverageRating()
         {
@@ -171,19 +174,18 @@ namespace AyanaTests
             Assert.AreEqual(4, result, "Should calculate the correct average rating");
         }
 
-
-
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void Category_ShouldReturnProductsInCategory()
         {
             // Arrange
             var category = "Category1";
             var productList = new List<Product>
-        {
-            new Product { ProductID = 1, Name = "Product1", Category = "Category1" },
-            new Product { ProductID = 2, Name = "Product2", Category = "Category1" },
-            new Product { ProductID = 3, Name = "Product3", Category = "OtherCategory" },
-        };
+            {
+                new Product { ProductID = 1, Name = "Product1", Category = "Category1" },
+                new Product { ProductID = 2, Name = "Product2", Category = "Category1" },
+                new Product { ProductID = 3, Name = "Product3", Category = "OtherCategory" },
+            };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
 
@@ -206,17 +208,18 @@ namespace AyanaTests
             Assert.AreEqual(2, list.Count, $"Should return 2 products in category '{category}'");
         }
 
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void CategoryView_ShouldReturnEmptyListForNullResults()
         {
             // Arrange
             var category = "";
             var productList = new List<Product>
-    {
-        new Product { ProductID = 1, Name = "Product1", Category = "Category1" },
-        new Product { ProductID = 2, Name = "Product2", Category = "Category1" },
-        new Product { ProductID = 3, Name = "Product3", Category = "OtherCategory" },
-    };
+            {
+                new Product { ProductID = 1, Name = "Product1", Category = "Category1" },
+                new Product { ProductID = 2, Name = "Product2", Category = "Category1" },
+                new Product { ProductID = 3, Name = "Product3", Category = "OtherCategory" },
+            };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
             productDbSetMock.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productList.GetEnumerator());
@@ -238,20 +241,18 @@ namespace AyanaTests
             CollectionAssert.AreEqual(new List<Product>(), (List<Product>)viewResult.Model, "Should have an empty list for category in the model");
         }
 
-
-
-
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void Category_ShouldReturnZeroProductsInCategory()
         {
             // Arrange
             var category = "";
             var productList = new List<Product>
-    {
-        new Product { ProductID = 1, Name = "Product1", Category = "Category1" },
-        new Product { ProductID = 2, Name = "Product2", Category = "Category1" },
-        new Product { ProductID = 3, Name = "Product3", Category = "OtherCategory" },
-    };
+            {
+                new Product { ProductID = 1, Name = "Product1", Category = "Category1" },
+                new Product { ProductID = 2, Name = "Product2", Category = "Category1" },
+                new Product { ProductID = 3, Name = "Product3", Category = "OtherCategory" },
+            };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
             productDbSetMock.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productList.GetEnumerator());
@@ -272,7 +273,7 @@ namespace AyanaTests
             Assert.IsNull(controller.ViewBag.Products, "Should set ViewBag.Products to null for 0 products");
         }
 
-        // Add this method to test the Privacy action
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void Privacy_ShouldReturnView()
         {
@@ -286,10 +287,7 @@ namespace AyanaTests
             Assert.IsInstanceOfType(result, typeof(ViewResult), "Privacy action should return a ViewResult");
         }
 
-        
-        
-
-        // Add this method to test the Help action
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void Help_ShouldReturnView()
         {
@@ -303,7 +301,7 @@ namespace AyanaTests
             Assert.IsInstanceOfType(result, typeof(ViewResult), "Help action should return a ViewResult");
         }
 
-        // Add this method to test the DeliveryPolicy action
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void DeliveryPolicy_ShouldReturnView()
         {
@@ -317,7 +315,7 @@ namespace AyanaTests
             Assert.IsInstanceOfType(result, typeof(ViewResult), "DeliveryPolicy action should return a ViewResult");
         }
 
-        // Add this method to test the SignIn action
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void SignIn_ShouldReturnView()
         {
@@ -331,10 +329,7 @@ namespace AyanaTests
             Assert.IsInstanceOfType(result, typeof(ViewResult), "SignIn action should return a ViewResult");
         }
 
-        // Add this method to test the AboutUs action
-        
-
-        // Add this method to test the Subscription action
+        // written by : Ilhan Hasičić
         [TestMethod]
         public void Subscription_ShouldReturnView()
         {
@@ -347,6 +342,82 @@ namespace AyanaTests
             // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult), "Subscription action should return a ViewResult");
         }
+
+       
+        // written by : Aida Zametica
+        [TestMethod]
+        public void Index_ShouldReturnView()
+        {
+        
+            var productList = new List<Product>
+            {
+                new Product { ProductID = 1, Name = "Product1", Category = "Birthday", Price = 20 },
+                new Product { ProductID = 2, Name = "Product2", Category = "Birthday", Price = 15 },
+                new Product { ProductID = 3, Name = "Product3", Category = "Birthday", Price = 25 },
+                new Product { ProductID = 4, Name = "Product4", Category = "OtherCategory", Price = 10 },
+            };
+
+            var productDbSetMock = new Mock<DbSet<Product>>();
+            productDbSetMock.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productList.AsQueryable().Provider);
+            productDbSetMock.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(productList.AsQueryable().Expression);
+            productDbSetMock.As<IQueryable<Product>>().Setup(m => m.ElementType).Returns(productList.AsQueryable().ElementType);
+            productDbSetMock.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(() => productList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Products).Returns(productDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+
+            var result = controller.Index();
+
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+        }
+
+        // written by : Aida Zametica
+        [TestMethod]
+        public void OverallRating_ShouldReturnAverageRatingZero()
+        {
+        
+            var orderList = new List<Order>{};
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+            controller.OverallRating();
+
+            var result = controller.ViewBag.rating;
+  
+            Assert.AreEqual(0, result);
+        }
+
+        /*
+        [TestMethod]
+        public void AboutUs_ShouldReturnView()
+        {
+
+            var controllerMock = new Mock<HomeController>(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
+
+            controllerMock.Setup(x => x.OverallRating());
+
+
+            var controller = controllerMock.Object;
+
+            var result = controller.AboutUs();
+
+
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+
+        }
+        */
 
 
 

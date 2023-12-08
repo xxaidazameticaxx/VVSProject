@@ -49,7 +49,7 @@ namespace Ayana.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public virtual IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
@@ -75,7 +75,7 @@ namespace Ayana.Controllers
             return View();
         }
 
-        public void OverallRating(){ 
+        public virtual void OverallRating(){ 
        
             List<Order> orders = _context.Orders.ToList();
 
@@ -94,7 +94,6 @@ namespace Ayana.Controllers
                 ViewBag.rating = Math.Round((decimal)rating / temp, 1);
             else ViewBag.rating = 0;
                
-            Console.WriteLine(rating);
         }
         public void BestSellers()
         {
