@@ -22,7 +22,7 @@ namespace Ayana.Data
         public virtual DbSet<Cart> Cart { get; set; }
 
         public virtual DbSet<Order> Orders { get; set; }
-        public DbSet<Discount> Discounts { get; set; }
+        public virtual DbSet<Discount> Discounts { get; set; }
         public virtual DbSet<Payment> Payments { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public DbSet<Report> Reports { get; set; }
