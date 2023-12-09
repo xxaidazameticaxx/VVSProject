@@ -8,13 +8,23 @@ namespace Ayana.Paterni
     {
         private ISort _sortStrategy;
 
+        public ProductSorter()
+        {
+            
+        }
+
         public void SetSortStrategy(ISort sortStrategy)
         {
             _sortStrategy = sortStrategy;
         }
 
-    
-            public List<Product> Sort(List<Product> products, string sortOption)
+        public ISort GetSortStrategy()
+        {
+            return _sortStrategy;
+        }
+
+
+        public List<Product> Sort(List<Product> products, string sortOption)
             {
                 Dictionary<string, ISort> sortStrategyMap = new Dictionary<string, ISort>()
     {

@@ -405,29 +405,37 @@ namespace AyanaTests
             Assert.AreEqual(0, result);
         }
 
-       
-
-
-
-        /*
+        //written by Vedran Mujić and Almedin Pašalić
         [TestMethod]
-        public void AboutUs_ShouldReturnView()
+        public void AboutUs_ShouldReturnViewResult()
         {
+            // Arrange
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            var orderList = new List<Order> { };
 
-            var controllerMock = new Mock<HomeController>(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
 
-            controllerMock.Setup(x => x.OverallRating());
 
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
 
-            var controller = controllerMock.Object;
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
+            // Act
             var result = controller.AboutUs();
 
-
+            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
-
         }
-        */
+
+
+
+
+
+        
 
 
 
