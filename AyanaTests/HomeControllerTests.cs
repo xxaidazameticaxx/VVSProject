@@ -433,9 +433,37 @@ namespace AyanaTests
 
 
 
+        [TestMethod]
+        public void ErrorTest()
+        {
+            // Mock HttpContext
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            var httpContextMock = new Mock<HttpContext>();
+            httpContextMock.Setup(c => c.TraceIdentifier).Returns("test_trace_id");
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = httpContextMock.Object
+                }
+            };
+
+            var result = controller.Error() as ViewResult;
+
+            // Provjeri da li je rezultat tipa ViewResult
+            Assert.IsNotNull(result);
+
+            // Provjeri da li je model ErrorViewModel
+            Assert.IsInstanceOfType(result.Model, typeof(ErrorViewModel));
+
+            // Provjeri da li su podaci modela ispravni
+            var model = result.Model as ErrorViewModel;
+            Assert.AreEqual("test_trace_id", model.RequestId);
+        }
 
 
-        
+
 
 
 
