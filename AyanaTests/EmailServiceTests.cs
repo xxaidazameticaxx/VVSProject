@@ -13,6 +13,8 @@ namespace AyanaTests
     [TestClass]
     public class EmailServiceTests
     {
+        private const string CacheFieldName = "_cache";
+
         // written by: Ilhan Hasičić
         [TestMethod]
         public void SendVerificationCode_ShouldCallSendEmailToCustomer()
@@ -73,8 +75,6 @@ namespace AyanaTests
 
             Assert.IsTrue(int.TryParse(code, out int codeValue) && codeValue >= 1000 && codeValue <= 9999);
         }
-
-
     }
 
 }
