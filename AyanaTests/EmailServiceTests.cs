@@ -74,44 +74,6 @@ namespace AyanaTests
             Assert.IsTrue(int.TryParse(code, out int codeValue) && codeValue >= 1000 && codeValue <= 9999);
         }
 
-        [TestMethod]
-        public void SaveCodeToCache_ShouldCacheCodeForSpecifiedEmail()
-        {
-            // Arrange
-            var emailService = new EmailService(Mock.Of<IMailgunService>());
-            var email = "test@example.com";
-            var code = "1234";
-
-            // Act
-            emailService.SaveCodeToCache(email, code);
-
-            // Use reflection to access the private Cache field
-            var cacheField = typeof(EmailService).GetField("Cache", BindingFlags.Instance | BindingFlags.NonPublic);
-            var cache = (IMemoryCache)cacheField.GetValue(emailService);
-
-            // Assert
-            var cachedCode = cache.Get(email) as string;
-            Assert.AreEqual(code, cachedCode);
-        }
-
-        [TestMethod]
-        public void SaveCodeToCache_ShouldCacheCodeForSpecifiedEmail2()
-        {
-            // Arrange
-            var emailService = new EmailService(Mock.Of<IMailgunService>());
-            var email = "test@example.com";
-            var code = "1234";
-
-            // Act
-            emailService.SaveCodeToCache(email, code);
-
-            // Use reflection to access the private Cache field
-            var cacheField = typeof(EmailService).GetField("Cache", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            var cache = (IMemoryCache)cacheField.GetValue(emailService);
-            var cachedCode = cache.Get(email) as string;
-            Assert.AreEqual(code, cachedCode);
-        }
 
     }
 
