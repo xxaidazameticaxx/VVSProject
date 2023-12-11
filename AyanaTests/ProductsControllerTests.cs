@@ -11,6 +11,7 @@ using Moq;
 
 namespace AyanaTests
 {
+    //written by: Almedin Pašalić
     [TestClass]
     public class ProductsControllerTests
     {
@@ -32,6 +33,7 @@ namespace AyanaTests
             productType = "Type A"
         };
 
+        //written by: Almedin Pašalić
         [TestInitialize]
         public void TestInitialize()
         {
@@ -66,7 +68,6 @@ namespace AyanaTests
             }
         };
 
-            // Konfiguracija DbContext mock-a
             var productsDbSetMock = new Mock<DbSet<Product>>();
             productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(testData.AsQueryable().Provider);
             productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(testData.AsQueryable().Expression);
@@ -94,14 +95,11 @@ namespace AyanaTests
             iProductMock.Setup(editor => editor.EditAll(It.IsAny<Product>()))
                 .Callback<Product>(editedProduct =>
                 {
-                    // Implementirajte potrebnu logiku za uređivanje u mocku
                     var existingProduct = testData.FirstOrDefault(p => p.ProductID == editedProduct.ProductID);
                     if (existingProduct != null)
                     {
-                        // Ovdje možete implementirati logiku uređivanja proizvoda
                         existingProduct.Name = editedProduct.Name;
                         existingProduct.Price = editedProduct.Price;
-                        // Ostale atribute...
                     }
                     else
                     {
@@ -112,14 +110,11 @@ namespace AyanaTests
             iProductMock.Setup(editor => editor.EditNameAndPrice(It.IsAny<int>(), It.IsAny<Product>()))
                 .Callback<int, Product>((productId, editedProduct) =>
                 {
-                    // Implementirajte potrebnu logiku za uređivanje imena i cijene u mocku
                     var existingProduct = testData.FirstOrDefault(p => p.ProductID == productId);
                     if (existingProduct != null)
                     {
-                        // Ovdje možete implementirati logiku uređivanja imena i cijene proizvoda
                         existingProduct.Name = editedProduct.Name;
                         existingProduct.Price = editedProduct.Price;
-                        // Ostali atributi...
                     }
                     else
                     {
@@ -130,41 +125,35 @@ namespace AyanaTests
             controller = new ProductsController(dbContextMock.Object, iProductMock.Object);
         }
 
-
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Index_ReturnsViewWithProducts()
         {
-            // Act
             var result = await controller.Index();
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void Create_ReturnsView()
         {
-            // Act
             var result = controller.Create();
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
-
+        //written by: Almedin Pašalić
         [TestMethod]
         public void SearchResult_ReturnsViewWithFilteredProducts()
         {
-            // Arrange
-            var searchString = "Product 1"; // Postavite željenu pretragu
-            var expectedResultCount = 1; // Broj očekivanih elemenata u rezultatu
+            var searchString = "Product 1"; 
+            var expectedResultCount = 1; 
 
-            // Act
             var result = controller.SearchResult(searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -175,13 +164,12 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void SearchResult_ReturnsViewWithAllProductsWhenSearchIsNull()
         {
-            // Act
             var result = controller.SearchResult(null);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -192,58 +180,51 @@ namespace AyanaTests
             CollectionAssert.AreEqual(testData, model);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Details_ReturnsViewWithProduct()
         {
-            int productId = 1; // Postavite ID proizvoda koji želite koristiti za testiranje
+            int productId = 1; 
 
-            // Act
             var result = await controller.Details(1);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
-            // Dobijanje modela iz rezultata
             var viewResult = (ViewResult)result;
             var model = viewResult.Model as Product;
 
-            // Assert za model
             Assert.IsNotNull(model);
             Assert.AreEqual(1, model.ProductID);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Details_ReturnsNotFound_WhenIdIsNull()
         {
-            // Act
             var result = await controller.Details(null);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Details_ReturnsNotFound_WhenProductIsNull()
         {
-            // Act
             var result = await controller.Details(4);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void PopularSearches_ReturnsViewWithFilteredProducts()
         {
-            // Arrange
-            var searchString = "BAM.25"; // Postavite željenu pretragu
-            var expectedResultCount = 1; // Broj očekivanih elemenata u rezultatu
+            var searchString = "BAM.25"; 
+            var expectedResultCount = 1; 
 
-            // Act
             var result = controller.PopularSearches(searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -254,17 +235,15 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void PopularSearches_ReturnsViewWithCategoryProducts()
         {
-            // Arrange
-            var searchString = "Flowers"; // Postavite željenu pretragu
-            var expectedResultCount = 2; // Broj očekivanih elemenata u rezultatu
+            var searchString = "Flowers"; 
+            var expectedResultCount = 2;
 
-            // Act
             var result = controller.PopularSearches(searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -275,17 +254,15 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void PopularSearches_ReturnsViewWithFlowerTypeProducts()
         {
-            // Arrange
-            var searchString = "Rose"; // Postavite željenu pretragu
-            var expectedResultCount = 1; // Broj očekivanih elemenata u rezultatu
+            var searchString = "Rose"; 
+            var expectedResultCount = 1; 
 
-            // Act
             var result = controller.PopularSearches(searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -296,17 +273,14 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void PopularSearches_ReturnsViewWithEmptyCategoryList()
         {
-            // Arrange
-            var searchString = "NonExistingCategory"; // Postavite željenu pretragu
-            var expectedResultCount = 0; // Broj očekivanih elemenata u rezultatu
-
-            // Act
+            var searchString = "NonExistingCategory"; 
+            var expectedResultCount = 0; 
             var result = controller.PopularSearches(searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
@@ -317,18 +291,16 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void Sort_ReturnsPartialViewWithSortedProducts()
         {
-            // Arrange
-            var sortOption = "ascendingName"; // Postavite željeni sortOption
-            var searchString = "Flowers"; // Postavite željenu pretragu
-            var expectedResultCount = 2; // Broj očekivanih elemenata u rezultatu
+            var sortOption = "ascendingName"; 
+            var searchString = "Flowers"; 
+            var expectedResultCount = 2; 
 
-            // Act
             var result = controller.Sort(sortOption, searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(PartialViewResult));
 
@@ -340,18 +312,16 @@ namespace AyanaTests
             CollectionAssert.AreEqual(testData, model);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void Sort_ReturnsPartialViewWithSortedProducts_WhenCategoryIsNull()
         {
-            // Arrange
-            var sortOption = "ascendingName"; // Postavite željeni sortOption
-            var searchString = "Lily"; // Postavite željenu pretragu
-            var expectedResultCount = 1; // Broj očekivanih elemenata u rezultatu
+            var sortOption = "ascendingName"; 
+            var searchString = "Lily";
+            var expectedResultCount = 1; 
 
-            // Act
             var result = controller.Sort(sortOption, searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(PartialViewResult));
 
@@ -362,18 +332,16 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void Sort_ReturnsPartialViewWithSortedProducts_WhenFlowerTypeIsNull()
         {
-            // Arrange
-            var sortOption = "ascendingName"; // Postavite željeni sortOption
-            var searchString = "Product 1"; // Postavite željenu pretragu
-            var expectedResultCount = 1; // Broj očekivanih elemenata u rezultatu
+            var sortOption = "ascendingName";
+            var searchString = "Product 1"; 
+            var expectedResultCount = 1; 
 
-            // Act
             var result = controller.Sort(sortOption, searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(PartialViewResult));
 
@@ -384,18 +352,16 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void Sort_ReturnsPartialViewWithSortedProducts_WhenSearchStringIsNull()
         {
-            // Arrange
-            var sortOption = "descendingName"; // Postavite željeni sortOption
-            string searchString = null; // Postavite željenu pretragu
-            var expectedResultCount = 2; // Broj očekivanih elemenata u rezultatu
+            var sortOption = "descendingName"; 
+            string searchString = null; 
+            var expectedResultCount = 2; 
 
-            // Act
             var result = controller.Sort(sortOption, searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(PartialViewResult));
 
@@ -406,18 +372,16 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void Sort_ReturnsPartialViewWithSortedProducts_WhenSortOptionIsAscendingPrice()
         {
-            // Arrange
-            var sortOption = "ascendingPrice"; // Postavite željeni sortOption
-            string searchString = null; // Postavite željenu pretragu
-            var expectedResultCount = 2; // Broj očekivanih elemenata u rezultatu
+            var sortOption = "ascendingPrice";
+            string searchString = null; 
+            var expectedResultCount = 2; 
 
-            // Act
             var result = controller.Sort(sortOption, searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(PartialViewResult));
 
@@ -428,19 +392,17 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void Sort_ReturnsPartialViewWithSortedProducts_WhenSortOptionIsDescendingPrice()
         {
-            // Arrange
-            var sortOption = "descendingPrice"; // Postavite željeni sortOption
-            string searchString = null; // Postavite željenu pretragu
-            var expectedResultCount = 2; // Broj očekivanih elemenata u rezultatu
+            var sortOption = "descendingPrice"; 
+            string searchString = null; 
+            var expectedResultCount = 2; 
 
-            // Act
             var result = controller.Sort(sortOption, searchString);
             var result1 = controller.Sort("Test", searchString);
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOfType(result, typeof(PartialViewResult));
 
@@ -451,89 +413,76 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Create_ValidModel_RedirectsToIndex()
         {
+            controller.ModelState.Clear();
 
-            controller.ModelState.Clear(); // Očisti ModelState
-
-            // Act
             var result = await controller.Create(testProduct);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Create_ValidModel_RedirectsToIndex_WhenModelIsNotValid()
         {
-
             controller.ModelState.AddModelError("Price", "Price must be greater than zero.");
 
-            // Act
             var result = await controller.Create(testProduct);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Edit_ReturnsViewWithProduct()
         {
-            // Arrange
-            int? existingProductId = 1;  // Postavite ID proizvoda koji postoji
-            int? nonExistingProductId = 100;  // Postavite ID koji ne postoji
-
-            // Simulirajte postojanje proizvoda sa datim ID-om u bazi podataka
+            int? existingProductId = 1;  
+            int? nonExistingProductId = 100;  
+           
             var existingProduct = new Product { ProductID = existingProductId.Value, Name = "ExistingProduct" };
             dbContextMock.Setup(d => d.Products.FindAsync(existingProductId)).ReturnsAsync(existingProduct);
 
             int? id = null;
-            // Act
+            
             var existingProductResult = await controller.Edit(existingProductId);
             var nonExistingProductResult = await controller.Edit(nonExistingProductId);
             var idIsNull = await controller.Edit(id);
 
-            // Assert
-            // Proverite da li je rezultat za postojeci proizvod tipa ViewResult i da li sadrži proizvod
             Assert.IsInstanceOfType(existingProductResult, typeof(ViewResult));
             var existingProductViewResult = (ViewResult)existingProductResult;
             Assert.IsNotNull(existingProductViewResult.Model);
             Assert.IsInstanceOfType(existingProductViewResult.Model, typeof(Product));
 
-            // Proverite da li rezultat za nepostojeci proizvod vraća NotFoundResult
             Assert.IsInstanceOfType(nonExistingProductResult, typeof(NotFoundResult));
             Assert.IsInstanceOfType(idIsNull, typeof(NotFoundResult));
         }
 
-
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Edit_ShouldReturnNotFound_WhenIdDoesNotMatch()
         {
-            // Arrange
             var id = 1;
 
-            // Act
             var result = await controller.Edit(id, testProduct);
 
             controller.ModelState.AddModelError("Price", "Price must be greater than zero.");
             var result1 = await controller.Edit(id, testData[0]);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
             Assert.IsInstanceOfType(result1, typeof(ViewResult));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Edit_ShouldReturnViewWithAllProducts_WhenEditIsSuccessful()
         {
-            // Arrange
-            int id = 1; // ID koji postoji u testnim podacima
+            int id = 1;
 
-            // Act
             var result = await controller.Edit(id, testData[0]);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
             var viewResult = (ViewResult)result;
@@ -541,14 +490,13 @@ namespace AyanaTests
 
             var model = viewResult.Model as List<Product>;
             Assert.IsNotNull(model);
-            // Provjerite možda ovisno o implementaciji, model treba sadržavati izmijenjene proizvode.
         }
 
+        //written by: Almedin Pašalić and Vedran Mujić
         [TestMethod]
         public async Task Edit_ShouldReturnViewWithAllProducts_WhenProductIsNull()
         {
-            // Arrange
-            int id = -1; // ID koji postoji u testnim podacima
+            int id = -1; 
 
             var product = new Product
             {
@@ -563,13 +511,12 @@ namespace AyanaTests
                 productType = "Type B"
             };
 
-            // Act
             var result = await controller.Edit(id, product);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
+        //written by: Almedin Pašalić and Vedran Mujić
         [TestMethod]
         public async Task EditNameAndPrice_ReturnsViewWithProduct_WhenProductDoesntExist_ModelStateIsntValid()
         {
@@ -587,16 +534,14 @@ namespace AyanaTests
             Assert.AreEqual("~/Views/Home/Index.cshtml", viewResult.ViewName);
         }
 
+        //written by: Almedin Pašalić and Vedran Mujić
         [TestMethod]
         public async Task EditNameAndPrice_ShouldReturnViewWithAllProducts_WhenEditIsSuccessful()
         {
-            // Arrange
-            int id = 1; // ID koji postoji u testnim podacima
-
-            // Act
+            int id = 1;
+          
             var result = await controller.EditNameAndPrice(id, testData[0]);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
 
             var viewResult = (ViewResult)result;
@@ -604,14 +549,13 @@ namespace AyanaTests
 
             var model = viewResult.Model as List<Product>;
             Assert.IsNotNull(model);
-            // Provjerite možda ovisno o implementaciji, model treba sadržavati izmijenjene proizvode.
         }
 
+        //written by: Almedin Pašalić and Vedran Mujić
         [TestMethod]
         public async Task EditNameAndPrice_ShouldReturnViewWithAllProducts_WhenProductIsNull()
         {
-            // Arrange
-            int id = -1; // ID koji postoji u testnim podacima
+            int id = -1; 
 
             var product = new Product
             {
@@ -626,18 +570,16 @@ namespace AyanaTests
                 productType = "Type B"
             };
 
-            // Act
             var result = await controller.EditNameAndPrice(id, product);
-
-            // Assert
+   
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task Delete_ShouldReturnViewWithProduct_WhenProductExists()
         {
-            // Arrange
-            int id = 1; // ID koji postoji u testnim podacima
+            int id = 1; 
             int notExsistingId = 8;
 
             // Act
@@ -655,16 +597,14 @@ namespace AyanaTests
             Assert.IsInstanceOfType(viewResult.Model, typeof(Product));
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public async Task DeleteConfirmed_ShouldRedirectToIndex_WhenProductExists()
         {
-            // Arrange
-            int id = 2; // ID koji postoji u testnim podacima
+            int id = 2; 
 
-            // Act
             var result = await controller.DeleteConfirmed(id);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
 
             var redirectResult = result as RedirectToActionResult;
@@ -672,16 +612,14 @@ namespace AyanaTests
             Assert.AreEqual("Index", redirectResult.ActionName);
         }
 
+        //written by: Almedin Pašalić
         [TestMethod]
         public void ProductExists_ShouldReturnTrue_WhenProductExists()
         {
-            // Arrange
-            int id = 1; // ID koji postoji u testnim podacima
+            int id = 1; 
 
-            // Act
             var result = controller.ProductExists(id);
 
-            // Assert
             Assert.IsTrue(result);
         }
 
