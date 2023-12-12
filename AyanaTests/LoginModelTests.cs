@@ -303,6 +303,57 @@ namespace AyanaTests
 
         }
 
+        [TestMethod]
+        public async Task OnPostAsync_WhenModelIsNotValid()
+        {
+            _loginModel.Input = new LoginModel.InputModel
+            {
+                Email = "valid-email@example.com",
+                Password = "valid-password",
+                RememberMe = false
+            };
+
+            var mockHttpContext = new Mock<HttpContext>();
+            var mockAuthenticationManager = new Mock<IAuthenticationService>();
+            var mockUrlHelperFactory = new Mock<IUrlHelperFactory>();
+            var mockUrlHelper = new Mock<IUrlHelper>();
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IAuthenticationService)))
+                .Returns(mockAuthenticationManager.Object);
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IUrlHelperFactory)))
+                .Returns(mockUrlHelperFactory.Object);
+
+            mockUrlHelperFactory.Setup(f => f.GetUrlHelper(It.IsAny<ActionContext>()))
+                .Returns(mockUrlHelper.Object);
+
+            mockUrlHelper.Setup(u => u.Content("~/"))
+                .Returns("mocked-url");
+
+            mockAuthenticationManager.Setup(x => x.SignOutAsync(mockHttpContext.Object, IdentityConstants.ExternalScheme, It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.CompletedTask);
+
+            _loginModel.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext
+            {
+                HttpContext = mockHttpContext.Object
+            };
+
+            // Arrange
+            _mockSignInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .ReturnsAsync(SignInResult.Failed);
+
+            _loginModel.ModelState.AddModelError("Email", "Invalid email");
+
+            // Act
+            var result = await _loginModel.OnPostAsync();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(PageResult));
+
+
+
+        }
+
 
 
 
