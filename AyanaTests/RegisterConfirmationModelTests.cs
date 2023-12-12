@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Primitives;
 
 namespace AyanaTests
 {
@@ -125,8 +126,168 @@ namespace AyanaTests
 
         }
 
-      
+        [TestMethod]
+        public async Task OnPostAsync_UserIsNull_ReturnsNotFound()
+        {
+            // Arrange
+            var confirmationCode = "valid-code";
+            string returnUrl = "/some-page";
+            string email = "nonexistent@example.com";
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync((ApplicationUser)null);
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>
+       {
+           { "Email", email }
+       });
+            _registerConfirmationModel.PageContext = new PageContext { HttpContext = httpContext };
+            // Act
+            var result = await _registerConfirmationModel.OnPostAsync(confirmationCode, returnUrl);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.AreEqual($"Unable to load user with email '{email}'.", notFoundResult.Value);
+        }
+
+       
         
+        [TestMethod]
+        public async Task OnPostAsync_ModelStateNotValid_ReturnsPage()
+        {
+            // Arrange
+            var confirmationCode = "valid-code";
+            string returnUrl = "/some-page";
+            string email = "test@example.com";
+
+            _registerConfirmationModel.Email = email;
+
+            _registerConfirmationModel.ModelState.AddModelError("PropertyName", "Error message");
+
+            // Act
+            var result = await _registerConfirmationModel.OnPostAsync(confirmationCode, returnUrl);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(PageResult));
+        }
+
+        [TestMethod]
+        public async Task OnPostAsync_VerifyCodeFalse_DeletesUserAndReturnsRedirectToRegister()
+        {
+            // Arrange
+            var confirmationCode = "invalid-code";
+            string returnUrl = "/some-page";
+            string email = "test@example.com";
+
+            var user = new ApplicationUser { Email = email };
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync(user);
+
+            _mockEmailService.Setup(x => x.VerifyCode(email, confirmationCode))
+                .Returns(false);
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>
+     {
+         { "Email", email }
+     });
+            _registerConfirmationModel.PageContext = new PageContext { HttpContext = httpContext };
+
+            // Act
+            var result = await _registerConfirmationModel.OnPostAsync(confirmationCode, returnUrl);
+
+            Assert.IsInstanceOfType(result, typeof(RedirectToPageResult));
+            var redirectResult = (RedirectToPageResult)result;
+            Assert.AreEqual("/Account/Register", redirectResult.PageName);
+        }
+
+        [TestMethod]
+        public async Task OnPostAsync_VerifyCodeTrue_SignsInUserAndReturnsLocalRedirect()
+        {
+            // Arrange
+            var confirmationCode = "valid-code";
+            string returnUrl = "/some-page";
+            string email = "test@example.com";
+
+            var user = new ApplicationUser { Email = email };
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync(user);
+
+            _mockEmailService.Setup(x => x.VerifyCode(email, confirmationCode))
+                .Returns(true);
+
+            var identityResult = IdentityResult.Success;
+            _mockUserManager.Setup(x => x.UpdateAsync(user))
+                .ReturnsAsync(identityResult);
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>
+    {
+        { "Email", email }
+    });
+            _registerConfirmationModel.PageContext = new PageContext { HttpContext = httpContext };
+
+            // Act
+            var result = await _registerConfirmationModel.OnPostAsync(confirmationCode, returnUrl);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(LocalRedirectResult));
+            var redirectResult = (LocalRedirectResult)result;
+            Assert.AreEqual(returnUrl, redirectResult.Url);
+
+            // Ensure user is signed in
+            _mockSignInManager.Verify(x => x.SignInAsync(user, false, null), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task OnPostAsync_VerifyCodeTrue_UpdateUserFails_AddsErrorsToModelState()
+        {
+            // Arrange
+            var confirmationCode = "valid-code";
+            string returnUrl = "/some-page";
+            string email = "test@example.com";
+
+            var user = new ApplicationUser { Email = email };
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(email))
+                .ReturnsAsync(user);
+
+            _mockEmailService.Setup(x => x.VerifyCode(email, confirmationCode))
+                .Returns(true);
+
+            var identityResult = IdentityResult.Failed(new IdentityError { Description = "Error 1" },
+                                                      new IdentityError { Description = "Error 2" });
+            _mockUserManager.Setup(x => x.UpdateAsync(user))
+                .ReturnsAsync(identityResult);
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>
+{
+    { "Email", email }
+});
+            _registerConfirmationModel.PageContext = new PageContext { HttpContext = httpContext };
+
+            // Act
+            var result = await _registerConfirmationModel.OnPostAsync(confirmationCode, returnUrl);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(Microsoft.AspNetCore.Mvc.RedirectToPageResult)); // Corrected assertion type
+            Assert.AreEqual(2, _registerConfirmationModel.ModelState.ErrorCount); // Check that errors are added
+
+            // Optionally, check specific error messages
+            Assert.IsTrue(_registerConfirmationModel.ModelState.ContainsKey(string.Empty));
+            var errorMessages = _registerConfirmationModel.ModelState[string.Empty].Errors.Select(e => e.ErrorMessage).ToList();
+            CollectionAssert.Contains(errorMessages, "Error 1");
+            CollectionAssert.Contains(errorMessages, "Error 2");
+        }
+
+
+
+
 
 
     }
