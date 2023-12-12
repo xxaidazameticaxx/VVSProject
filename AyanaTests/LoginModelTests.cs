@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.ComponentModel.DataAnnotations;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace AyanaTests
 {
@@ -101,7 +102,160 @@ namespace AyanaTests
             Assert.AreEqual("mocked-url", _loginModel.ReturnUrl);
         }
 
-      
+        [TestMethod]
+        public async Task OnPostAsync_ValidModelState_Succeeds_ReturnsLocalRedirect()
+        {
+            // Arrange
+            _loginModel.Input = new LoginModel.InputModel
+            {
+                Email = "valid-email@example.com",
+                Password = "valid-password",
+                RememberMe = false
+            };
+
+            var mockHttpContext = new Mock<HttpContext>();
+            var mockAuthenticationManager = new Mock<IAuthenticationService>();
+            var mockUrlHelperFactory = new Mock<IUrlHelperFactory>();
+            var mockUrlHelper = new Mock<IUrlHelper>();
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IAuthenticationService)))
+                .Returns(mockAuthenticationManager.Object);
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IUrlHelperFactory)))
+                .Returns(mockUrlHelperFactory.Object);
+
+            mockUrlHelperFactory.Setup(f => f.GetUrlHelper(It.IsAny<ActionContext>()))
+                .Returns(mockUrlHelper.Object);
+
+            mockUrlHelper.Setup(u => u.Content("~/"))
+                .Returns("mocked-url");
+
+            mockAuthenticationManager.Setup(x => x.SignOutAsync(mockHttpContext.Object, IdentityConstants.ExternalScheme, It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.CompletedTask);
+
+            _loginModel.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext
+            {
+                HttpContext = mockHttpContext.Object
+            };
+
+
+            // Arrange
+            _mockSignInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .ReturnsAsync(SignInResult.Success);  
+
+            // Act
+            var result = await _loginModel.OnPostAsync();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(Microsoft.AspNetCore.Mvc.LocalRedirectResult));
+            var redirectResult = (LocalRedirectResult)result;
+            Assert.AreEqual("mocked-url", redirectResult.Url);
+        }
+
+        [TestMethod]
+        public async Task OnPostAsync_RequiresTwoFactor_RedirectsToLoginWith2fa()
+        {
+            // Arrange
+            _loginModel.Input = new LoginModel.InputModel
+            {
+                Email = "valid-email@example.com",
+                Password = "valid-password",
+                RememberMe = false
+            };
+
+            var mockHttpContext = new Mock<HttpContext>();
+            var mockAuthenticationManager = new Mock<IAuthenticationService>();
+            var mockUrlHelperFactory = new Mock<IUrlHelperFactory>();
+            var mockUrlHelper = new Mock<IUrlHelper>();
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IAuthenticationService)))
+                .Returns(mockAuthenticationManager.Object);
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IUrlHelperFactory)))
+                .Returns(mockUrlHelperFactory.Object);
+
+            mockUrlHelperFactory.Setup(f => f.GetUrlHelper(It.IsAny<ActionContext>()))
+                .Returns(mockUrlHelper.Object);
+
+            mockUrlHelper.Setup(u => u.Content("~/"))
+                .Returns("mocked-url");
+
+            mockAuthenticationManager.Setup(x => x.SignOutAsync(mockHttpContext.Object, IdentityConstants.ExternalScheme, It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.CompletedTask);
+
+            _loginModel.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext
+            {
+                HttpContext = mockHttpContext.Object
+            };
+
+            // Arrange
+            _mockSignInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .ReturnsAsync(SignInResult.TwoFactorRequired);
+
+            // Act
+            var result = await _loginModel.OnPostAsync();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(RedirectToPageResult));
+
+            var redirectResult = (RedirectToPageResult)result;
+            Assert.AreEqual("./LoginWith2fa", redirectResult.PageName);
+
+        }
+
+        [TestMethod]
+        public async Task OnPostAsync_IsLockedOut_RedirectsToLoginWithLockout()
+        {
+            // Arrange
+            _loginModel.Input = new LoginModel.InputModel
+            {
+                Email = "valid-email@example.com",
+                Password = "valid-password",
+                RememberMe = false
+            };
+
+            var mockHttpContext = new Mock<HttpContext>();
+            var mockAuthenticationManager = new Mock<IAuthenticationService>();
+            var mockUrlHelperFactory = new Mock<IUrlHelperFactory>();
+            var mockUrlHelper = new Mock<IUrlHelper>();
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IAuthenticationService)))
+                .Returns(mockAuthenticationManager.Object);
+
+            mockHttpContext.Setup(c => c.RequestServices.GetService(typeof(IUrlHelperFactory)))
+                .Returns(mockUrlHelperFactory.Object);
+
+            mockUrlHelperFactory.Setup(f => f.GetUrlHelper(It.IsAny<ActionContext>()))
+                .Returns(mockUrlHelper.Object);
+
+            mockUrlHelper.Setup(u => u.Content("~/"))
+                .Returns("mocked-url");
+
+            mockAuthenticationManager.Setup(x => x.SignOutAsync(mockHttpContext.Object, IdentityConstants.ExternalScheme, It.IsAny<AuthenticationProperties>()))
+                .Returns(Task.CompletedTask);
+
+            _loginModel.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext
+            {
+                HttpContext = mockHttpContext.Object
+            };
+
+            // Arrange
+            _mockSignInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .ReturnsAsync(SignInResult.LockedOut);
+
+            // Act
+            var result = await _loginModel.OnPostAsync();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(RedirectToPageResult));
+
+            var redirectResult = (RedirectToPageResult)result;
+            Assert.AreEqual("./Lockout", redirectResult.PageName);
+
+        }
+
+
+
 
     }
 }

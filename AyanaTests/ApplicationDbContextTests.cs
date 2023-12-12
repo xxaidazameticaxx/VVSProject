@@ -13,6 +13,7 @@ namespace AyanaTests
     [TestClass()]
     public class ApplicationDbContextTests
     {
+
         // written by : Aida Zametica
         [TestMethod]
         public void ModelConfigurationTest()
