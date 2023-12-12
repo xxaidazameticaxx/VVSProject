@@ -1,4 +1,6 @@
 ﻿using Ayana;
+using Hangfire.SqlServer;
+using Hangfire;
 using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -18,6 +20,8 @@ namespace AyanaTests
             Assert.IsNotNull(hostBuilder);
             Assert.IsInstanceOfType(hostBuilder, typeof(IHostBuilder));
         }
+
+        
     }
 
 }
