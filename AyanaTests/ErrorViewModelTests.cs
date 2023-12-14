@@ -1,9 +1,4 @@
 ﻿using Ayana.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AyanaTests
 {
@@ -12,46 +7,43 @@ namespace AyanaTests
     {
         // written by : Aida Zametica
         [TestMethod]
-        public void RequestId_SetAndGet()
+        public void RequestId_SetAndGet_ReturnsCorrectValue()
         {
-            // Arrange
+
             var errorViewModel = new ErrorViewModel();
+
             var expectedRequestId = "123";
 
-            // Act
             errorViewModel.RequestId = expectedRequestId;
+
             var actualRequestId = errorViewModel.RequestId;
 
-            // Assert
             Assert.AreEqual(expectedRequestId, actualRequestId);
         }
 
         // written by : Aida Zametica
         [TestMethod]
-        public void ShowRequestId_TrueWhenRequestIdSet()
+        public void ShowRequestId_RequestIdIsSet_ReturnsTrue()
         {
-            // Arrange
+ 
             var errorViewModel = new ErrorViewModel();
+
             errorViewModel.RequestId = "123";
 
-            // Act
             var showRequestId = errorViewModel.ShowRequestId;
 
-            // Assert
             Assert.IsTrue(showRequestId);
         }
 
         // written by : Aida Zametica
         [TestMethod]
-        public void ShowRequestId_FalseWhenRequestIdNotSet()
+        public void ShowRequestId_RequestIdNotSet_ReturnsFalse()
         {
-            // Arrange
+
             var errorViewModel = new ErrorViewModel();
 
-            // Act
             var showRequestId = errorViewModel.ShowRequestId;
 
-            // Assert
             Assert.IsFalse(showRequestId);
         }
 

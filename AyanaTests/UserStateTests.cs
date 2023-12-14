@@ -7,7 +7,7 @@ namespace AyanaTests
     {
         // written by : Aida Zametica
         [TestMethod]
-        public void UserStateTest()
+        public void UserState_Initialization_ReturnsNotNullInstance()
         {
             UserState userState = new UserState();
 
@@ -16,7 +16,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void CanPurchaseTest()
+        public void CanPurchase_WhenInitialState_ReturnsFalse()
         {
             UserState userState = new UserState();
 
@@ -27,7 +27,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void CanViewTest()
+        public void CanView_WhenInitialState_ReturnsTrue()
         {
             UserState userState = new UserState();
 
@@ -38,7 +38,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void SetStateTest()
+        public void SetState_WithGuestState_SetsCorrectStateProperties()
         {
             UserState userState = new UserState();
 
@@ -47,7 +47,6 @@ namespace AyanaTests
             Assert.IsFalse(userState.CanPurchase());
             Assert.IsTrue(userState.CanView());
         }
-
 
     }
 }

@@ -1,6 +1,4 @@
-﻿using Ayana.MailgunService;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RestSharp;
+﻿using RestSharp;
 
 namespace AyanaTests
 {
@@ -9,7 +7,7 @@ namespace AyanaTests
     {
         // written by : Aida Zametica
         [TestMethod]
-        public void SendEmail_Failure()
+        public void SendEmail_WithInvalidApiKey_Fails()
         {
             string apiKey = "invalid-api-key";
             string domain = "your-domain";

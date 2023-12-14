@@ -145,9 +145,8 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public async Task OnPostAsync_ValidModelState_Failed_ReturnsPageResult()
+        public async Task OnPostAsync_ModelStateNotValid_ReturnsPageResult()
         {
-            // Arrange
             _registerModel.Input = new RegisterModel.InputModel
             {
                 Email = "valid-email@example.com", 
@@ -167,12 +166,9 @@ namespace AyanaTests
             _mockUserManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Simulating user creation failure" }));
 
-            // Act
             var result = await _registerModel.OnPostAsync();
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(Microsoft.AspNetCore.Mvc.RazorPages.PageResult));
-
            
         }
 

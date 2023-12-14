@@ -1,12 +1,6 @@
 ﻿using Ayana.Data;
 using Ayana.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AyanaTests
 {
@@ -16,7 +10,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void ModelConfigurationTest()
+        public void ApplicationDbContext_ModelConfiguration_ContainsEntities()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
@@ -35,7 +29,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void TableNameConfigurationTest()
+        public void ApplicationDbContext_TableNameConfiguration_TableNamesMatchExpected()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")

@@ -382,12 +382,13 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void OverallRating_ShouldReturnAverageRatingZero()
+        public void OverallRating_NoOrders_ShouldReturnAverageRatingZero()
         {
-        
+   
             var orderList = new List<Order>{};
 
             var orderDbSetMock = new Mock<DbSet<Order>>();
+
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);

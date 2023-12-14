@@ -7,7 +7,6 @@ using Ayana.Paterni;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.ComponentModel;
 
 namespace AyanaTests
 {
@@ -195,7 +194,7 @@ namespace AyanaTests
         [TestMethod]
         [DataRow(0)]
         [DataRow(1)]
-        public async Task CalculateDiscount_ValidDiscountAndNotExpired_ShouldApplyDiscountCorrectly(DiscountType discountType)
+        public async Task CalculateDiscount_ValidCodeAndNotExpired_ShouldApplyDiscountCorrectly(DiscountType discountType)
         {
             var payment = new Payment
             {
@@ -277,7 +276,7 @@ namespace AyanaTests
 
         // written by: Aida Zametica
         [TestMethod]
-        public async Task AddToCart_WhenProductItemNotFound_CreateCart()
+        public async Task AddToCart_WhenProductItemNotFound_CreatesCartWithProduct()
         {
             var cartList = new List<Cart>
             {
@@ -372,7 +371,7 @@ namespace AyanaTests
         [TestMethod]
         [DataRow("0")]
         [DataRow("1")]
-        public void Cart_ReturnsViewBagUpdated(string discountType)
+        public void Cart_RedirectActionToCart_ShouldUpdateViewBagCorrectly(string discountType)
         {
             var cartList = new List<Cart>
             {
@@ -426,7 +425,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void GetCartProducts_ReturnsListOfProductsForEachCart()
+        public void GetCartProducts_GivenCarts_ReturnsListOfProductsForEachCart()
         {
             var product1 = new Product{ ProductID = 1, Price = 20  };
             var product2 = new Product { ProductID = 2, Price = 30 };

@@ -1,10 +1,4 @@
 ﻿using Ayana.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AyanaTests
 {
@@ -13,7 +7,7 @@ namespace AyanaTests
     {
         // written by : Aida Zametica
         [TestMethod]
-        public void ProductSalesID_PropertyTest()
+        public void ProductSalesID_IsSet_GetProductSalesIDReturnsCorrectValue()
         {
             var productSales = new ProductSales();
 
@@ -24,7 +18,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        public void Product_PropertyTest()
+        public void Product_IsSet_GetProductReturnsCorrectProduct()
         {
             var productSales = new ProductSales();
             var product = new Product { ProductID = 3 };

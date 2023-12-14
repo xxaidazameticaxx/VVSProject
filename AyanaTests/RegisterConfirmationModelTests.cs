@@ -266,9 +266,9 @@ namespace AyanaTests
 
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>
-{
-    { "Email", email }
-});
+            {
+                { "Email", email }
+            });
             _registerConfirmationModel.PageContext = new PageContext { HttpContext = httpContext };
 
             // Act
