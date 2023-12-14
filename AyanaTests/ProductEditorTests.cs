@@ -2,6 +2,7 @@
 using Ayana.Data;
 using Ayana.Models;
 using Ayana.Patterns;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -93,20 +94,6 @@ namespace AyanaTests
         //written by Vedran Mujić
 
         [TestMethod]
-        public async Task EditAll_ShouldUpdateProductAndSaveChanges()
-        {
-            
-
-            
-            await pattern.EditAll(testData[0]);
-
-            // Assert
-            dbContextMock.Verify(d => d.Update(It.IsAny<Product>()), Times.Once);
-            dbContextMock.Verify(d => d.SaveChanges(), Times.Once);
-        }
-        //written by Vedran Mujić
-
-        [TestMethod]
         public async Task EditNameAndPrice_ShouldUpdateNameAndPriceAndSaveChanges()
         {
             // Arrange
@@ -152,6 +139,70 @@ namespace AyanaTests
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count); // Promijenite broj prema vašem stvarnom testnom skupu podataka
                                               // Dodatne provjere po potrebi
+        }
+
+        public static IEnumerable<object[]> GetTestDataCsv()
+        {
+            string csvFilePath = @"C:\Users\rzyen\OneDrive\Desktop\VVSProject\AyanaTests\TestData\Products.csv";
+
+            foreach (var line in File.ReadLines(csvFilePath).Skip(1))
+            {
+                var values = line.Split(',');
+
+                int productId = int.Parse(values[0]);
+                string productName = values[1];
+                string imageUrl = values[2];
+                double price = double.Parse(values[3]);
+                string flowerType = values[4];
+                int stock = int.Parse(values[5]);
+                string category = values[6];
+                string description = values[7];
+                string productType = values[8];
+
+                yield return new object[] { productId, productName, imageUrl, price, flowerType, stock, category, description, productType };
+            }
+        }
+
+        //written by: Vedran Mujić
+        [TestMethod]
+        [DynamicData(nameof(GetTestDataCsv), DynamicDataSourceType.Method)]
+        public void EditAll_ShouldUpdateProductAndSaveChanges(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        {
+            var product = new Product
+            {
+                ProductID = productId,
+                Name = productName,
+                ImageUrl = imageUrl,
+                Price = price,
+                FlowerType = flowerType,
+                Stock = stock,
+                Category = category,
+                Description = description,
+                productType = productType
+            };
+
+            var productList = new List<Product> { product };
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+
+
+            var productsDbSetMock = new Mock<DbSet<Product>>();
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productList.AsQueryable().Provider);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(productList.AsQueryable().Expression);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.ElementType).Returns(productList.AsQueryable().ElementType);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productList.GetEnumerator());
+
+            dbContextMock.Setup(d => d.Products).Returns(productsDbSetMock.Object);
+
+            pattern = new ProductEditor(dbContextMock.Object);
+
+            var result = pattern.EditAll(productList[0]);
+
+            
+            dbContextMock.Verify(d => d.Update(It.IsAny<Product>()), Times.Once);
+            dbContextMock.Verify(d => d.SaveChanges(), Times.Once);
+
+
         }
 
 
