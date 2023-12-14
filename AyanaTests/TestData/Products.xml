@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Products>
+	<Product>
+		<ProductID>1</ProductID>
+		<Name>Product 1</Name>
+		<ImageUrl>url1</ImageUrl>
+		<Price>19.99</Price>
+		<FlowerType>Rose</FlowerType>
+		<Stock>10</Stock>
+		<Category>Flowers</Category>
+		<Description>Beautiful red rose</Description>
+		<ProductType>Type A</ProductType>
+	</Product>
+	<Product>
+		<ProductID>2</ProductID>
+		<Name>Product 2</Name>
+		<ImageUrl>url2</ImageUrl>
+		<Price>29.99</Price>
+		<FlowerType>Lily</FlowerType>
+		<Stock>15</Stock>
+		<Category>Flowers</Category>
+		<Description>Elegant white lily</Description>
+		<ProductType>Type B</ProductType>
+	</Product>
+</Products>
+
