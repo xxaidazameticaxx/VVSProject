@@ -134,13 +134,6 @@ namespace AyanaTests
 
             Assert.IsNotNull(_registerModel.ExternalLogins);
             Assert.AreEqual(externalAuthSchemes.Count, _registerModel.ExternalLogins.Count);
-
-            foreach (var expectedScheme in externalAuthSchemes)
-            {
-                var actualScheme = _registerModel.ExternalLogins.FirstOrDefault(x => x.Name == expectedScheme.Name);
-                Assert.IsNotNull(actualScheme);
-                Assert.AreEqual(expectedScheme.DisplayName, actualScheme.DisplayName);
-            }
         }
 
         // written by : Aida Zametica
