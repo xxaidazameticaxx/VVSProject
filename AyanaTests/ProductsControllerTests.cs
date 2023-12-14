@@ -13,6 +13,7 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Serialization;
 using System.Xml.Linq;
+using Microsoft.Extensions.FileSystemGlobbing.Internal;
 
 namespace AyanaTests
 {
@@ -403,27 +404,9 @@ namespace AyanaTests
             Assert.AreEqual(expectedResultCount, model.Count);
         }
 
-        //written by: Almedin Pašalić
-        [TestMethod]
-        public async Task Create_ValidModel_RedirectsToIndex()
-        {
-            controller.ModelState.Clear();
+        
 
-            var result = await controller.Create(testProduct);
-
-            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
-        }
-
-        //written by: Almedin Pašalić
-        [TestMethod]
-        public async Task Create_ValidModel_RedirectsToIndex_WhenModelIsNotValid()
-        {
-            controller.ModelState.AddModelError("Price", "Price must be greater than zero.");
-
-            var result = await controller.Create(testProduct);
-
-            Assert.IsInstanceOfType(result, typeof(ViewResult));
-        }
+      
 
         //written by: Almedin Pašalić
         [TestMethod]
@@ -734,6 +717,98 @@ namespace AyanaTests
             Assert.IsNotNull(model);
             Assert.AreEqual(product.ProductID, model.ProductID);
         }
+
+
+        //written by: Vedran Mujić
+        [TestMethod]
+        [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
+        public async Task Create_DataDrivenTest(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        {
+            var product = new Product
+            {
+                ProductID = productId,
+                Name = productName,
+                ImageUrl = imageUrl,
+                Price = price,
+                FlowerType = flowerType,
+                Stock = stock,
+                Category = category,
+                Description = description,
+                productType = productType
+            };
+
+
+            var productList = new List<Product> { product };
+
+            var iProductMock = new Mock<IProduct>();
+            var dbContextMock = new Mock<ApplicationDbContext>();
+
+            var productsDbSetMock = new Mock<DbSet<Product>>();
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productList.AsQueryable().Provider);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(productList.AsQueryable().Expression);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.ElementType).Returns(productList.AsQueryable().ElementType);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productList.GetEnumerator());
+
+            dbContextMock.Setup(d => d.Products).Returns(productsDbSetMock.Object);
+
+            var productsController = new ProductsController(dbContextMock.Object, iProductMock.Object);
+
+            productsController.ModelState.Clear();
+
+            var result = await productsController.Create(testProduct);
+
+            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+        }
+
+
+
+        //written by: Vedran Mujić
+        [TestMethod]
+        [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
+        public async Task Create_WithError_DataDrivenTest(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        {
+            var product = new Product
+            {
+                ProductID = productId,
+                Name = productName,
+                ImageUrl = imageUrl,
+                Price = price,
+                FlowerType = flowerType,
+                Stock = stock,
+                Category = category,
+                Description = description,
+                productType = productType
+            };
+
+
+            var productList = new List<Product> { product };
+
+            var iProductMock = new Mock<IProduct>();
+            var dbContextMock = new Mock<ApplicationDbContext>();
+
+            var productsDbSetMock = new Mock<DbSet<Product>>();
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Provider).Returns(productList.AsQueryable().Provider);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.Expression).Returns(productList.AsQueryable().Expression);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.ElementType).Returns(productList.AsQueryable().ElementType);
+            productsDbSetMock.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productList.GetEnumerator());
+
+            dbContextMock.Setup(d => d.Products).Returns(productsDbSetMock.Object);
+
+            var productsController = new ProductsController(dbContextMock.Object, iProductMock.Object);
+
+            productsController.ModelState.Clear();
+
+            productsController.ModelState.AddModelError("Price", "Price must be greater than zero.");
+
+            var result = await productsController.Create(testProduct);
+
+            Assert.IsInstanceOfType(result, typeof(ViewResult));
+        }
+
+        
+
+
+
 
 
 
