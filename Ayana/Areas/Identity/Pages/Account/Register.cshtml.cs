@@ -102,7 +102,6 @@ namespace Ayana.Areas.Identity.Pages.Account
 
                     await _userManager.AddToRoleAsync(user, "Customers");
 
-
                     _logger.LogInformation("User created a new account with password.");
                     var verificationCode = _emailService.GenerateCode();
 
@@ -130,6 +129,7 @@ namespace Ayana.Areas.Identity.Pages.Account
                     }
 
                 }
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);

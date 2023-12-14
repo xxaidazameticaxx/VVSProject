@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
+using System;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace AyanaTests
 {
@@ -71,7 +73,7 @@ namespace AyanaTests
                 _mockEmailService.Object);
         }
 
-
+        // written by : Almedin Pašalić
         [TestMethod]
         public void InputModel_Email_ShouldBeRequired()
         {
@@ -97,6 +99,7 @@ namespace AyanaTests
             Assert.AreEqual("The Email field is required.", emailValidationResult.ErrorMessage);
         }
 
+        // written by : Almedin Pašalić
         [TestMethod]
         public async Task OnGetAsync_SetsReturnUrlAndExternalLogins()
         {
@@ -140,9 +143,39 @@ namespace AyanaTests
             }
         }
 
+        // written by : Aida Zametica
+        [TestMethod]
+        public async Task OnPostAsync_ValidModelState_Failed_ReturnsPageResult()
+        {
+            // Arrange
+            _registerModel.Input = new RegisterModel.InputModel
+            {
+                Email = "valid-email@example.com", 
+                Password = "valid-password",
+                ConfirmPassword = "valid-password",
+                FistName = "John",
+                LastName = "Doe"
+            };
 
+            var mockUrlHelper = new Mock<IUrlHelper>();
 
+            mockUrlHelper.Setup(u => u.Content("~/"))
+                .Returns("mocked-url");
 
+            _registerModel.Url = mockUrlHelper.Object;
 
+            _mockUserManager.Setup(u => u.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Simulating user creation failure" }));
+
+            // Act
+            var result = await _registerModel.OnPostAsync();
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(Microsoft.AspNetCore.Mvc.RazorPages.PageResult));
+
+           
+        }
+
+       
     }
 }

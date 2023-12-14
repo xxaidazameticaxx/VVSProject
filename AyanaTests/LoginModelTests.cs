@@ -102,6 +102,7 @@ namespace AyanaTests
             Assert.AreEqual("mocked-url", _loginModel.ReturnUrl);
         }
 
+        // written by : Aida Zametica
         [TestMethod]
         public async Task OnPostAsync_ValidModelState_Succeeds_ReturnsLocalRedirect()
         {
@@ -152,6 +153,7 @@ namespace AyanaTests
             Assert.AreEqual("mocked-url", redirectResult.Url);
         }
 
+        // written by : Aida Zametica 
         [TestMethod]
         public async Task OnPostAsync_RequiresTwoFactor_RedirectsToLoginWith2fa()
         {
@@ -203,6 +205,7 @@ namespace AyanaTests
 
         }
 
+        // written by : Aida Zametica and Almedin Pašalić
         [TestMethod]
         public async Task OnPostAsync_IsLockedOut_RedirectsToLoginWithLockout()
         {
@@ -254,6 +257,7 @@ namespace AyanaTests
 
         }
 
+        // written by : Aida Zametica and Almedin Pašalić
         [TestMethod]
         public async Task OnPostAsync_Failed_ReturnsToLoginPage()
         {
@@ -303,6 +307,7 @@ namespace AyanaTests
 
         }
 
+        // written by : Almedin Pašalić
         [TestMethod]
         public async Task OnPostAsync_WhenModelIsNotValid()
         {
