@@ -91,6 +91,7 @@ namespace AyanaTests
 
 
         }
+     
         //written by Vedran Mujić
 
         [TestMethod]
@@ -163,7 +164,7 @@ namespace AyanaTests
             }
         }
 
-        //written by: Vedran Mujić
+        //written by Almedin Pašalić
         [TestMethod]
         [DynamicData(nameof(GetTestDataCsv), DynamicDataSourceType.Method)]
         public void EditAll_ShouldUpdateProductAndSaveChanges(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
