@@ -1,0 +1,3 @@
+﻿ProductID,Name,ImageUrl,Price,FlowerType,Stock,Category,Description,ProductType
+1,Product 1,url1,19.99,Rose,10,Flowers,Beautiful red rose,Type A
+2,Product 2,url2,29.99,Lily,15,Flowers,Elegant white lily,Type B
