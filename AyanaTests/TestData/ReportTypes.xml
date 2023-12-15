@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ReportTypes>
+	<ReportType>
+		<id>1</id>
+		<Name>weekly</Name>
+	</ReportType>
+	<ReportType>
+		<id>2</id>
+		<Name>mothly</Name>
+	</ReportType>
+	<ReportType>
+		<id>3</id>
+		<Name>yearly</Name>
+	</ReportType>
+</ReportTypes>

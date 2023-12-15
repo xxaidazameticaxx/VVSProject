@@ -8,7 +8,7 @@ namespace AyanaTests
     {
         // written by : Lejla Heleg
         [TestMethod]
-        public void GetDiscount_ValidDicountCode_ShouldCallOnce()
+        public void GetDiscount_ValidDiscountCode_ShouldCallOnce()
         {
             var discountCodeVerifierMock = new Mock<IDiscountCodeVerifier>();
             var proxy = new DiscountCodeVerifierProxy(discountCodeVerifierMock.Object);

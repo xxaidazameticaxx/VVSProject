@@ -49,7 +49,7 @@ namespace AyanaTests
 
         // written by : Lejla Heleg
         [TestMethod]
-        public void CreateReport_InvalidParameter_ThrowsException()
+        public void CreateReport_InvalidParameter_ThrowsArgumentException()
         {
             var reportFactory = new ReportFactory(dbContextMock.Object);
 
@@ -58,36 +58,36 @@ namespace AyanaTests
 
         // written by : Lejla Heleg
         [TestMethod]
-        public void GenerateReport_WeeklyReport_ReturnsNotNullResult()
+        public void GenerateReport_WeeklyReport_ReturnsByteResult()
         {
             IReport weeklyReport = reportFactory.CreateReport("weekly");
 
             var result = weeklyReport.GenerateReport();
 
-            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(System.Byte[]));
         }
 
         // written by : Lejla Heleg
         [TestMethod]
-        public void GenerateReport_MonthlyReport_ReturnsNotNullResult()
+        public void GenerateReport_MonthlyReport_ReturnsByteResult()
         {
 
             IReport weeklyReport = reportFactory.CreateReport("monthly");
 
             var result = weeklyReport.GenerateReport();
 
-            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(System.Byte[]));
         }
 
         // written by : Lejla Heleg
         [TestMethod]
-        public void GenerateReport_YearlyReport_ReturnsNotNullResult()
+        public void GenerateReport_YearlyReport_ReturnsByteResult()
         {
             IReport weeklyReport = reportFactory.CreateReport("yearly");
 
             var result = weeklyReport.GenerateReport();
 
-            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(System.Byte[]));
         }
     }
 }
