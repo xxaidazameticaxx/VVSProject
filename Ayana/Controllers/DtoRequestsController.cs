@@ -279,7 +279,7 @@ namespace Ayana.Controllers
             return paymentForOrder;
         }
 
-        public async virtual Task<Order> SaveOrderData(Order order, string userId, Payment paymentForOrder, double totalWithDiscount)
+        public async virtual Task<Order> SaveOrderData(Order order, string userId, Payment paymentForOrder, double totalWithDiscount, DateTime dateTime)
         {
             Order newOrder = new()
             {
@@ -287,7 +287,7 @@ namespace Ayana.Controllers
                 CustomerID = userId,
                 PaymentID = paymentForOrder.PaymentID,
                 TotalAmountToPay = totalWithDiscount,
-                purchaseDate = DateTime.Now,
+                purchaseDate = dateTime,
                 personalMessage = order.personalMessage,
                 IsOrderSent = false,
                 Rating = null
@@ -299,7 +299,7 @@ namespace Ayana.Controllers
             return newOrder;
         }
 
-        public async virtual Task ProcessCartItems(string userId, Order newOrder)
+        public async virtual Task ProcessCartItems(string userId, Order newOrder,DateTime dateTime)
         {
             List<Cart> userCarts = _context.Cart
                 .Where(o => o.CustomerID == userId)
@@ -325,7 +325,7 @@ namespace Ayana.Controllers
                     {
                         ProductSales productSales = new()
                         {
-                            SalesDate = DateTime.Now,
+                            SalesDate = dateTime,
                             ProductID = product.ProductID
                         };
 
@@ -371,11 +371,13 @@ namespace Ayana.Controllers
             // Create payment for the order
             Payment paymentForOrder = await SavePaymentData(payment, totalWithDiscount, discountId);
 
+            var dateTime = DateTime.Now;
+
             // Create the order
-            Order newOrder = await SaveOrderData(order, userId, paymentForOrder, totalWithDiscount);
+            Order newOrder = await SaveOrderData(order, userId, paymentForOrder, totalWithDiscount,dateTime);
 
              // Clear the cart and update tables for the sales report
-            await ProcessCartItems(userId, newOrder);
+            await ProcessCartItems(userId, newOrder,dateTime);
 
             return Redirect("/DtoRequests/ThankYou?orderType=order");
         }

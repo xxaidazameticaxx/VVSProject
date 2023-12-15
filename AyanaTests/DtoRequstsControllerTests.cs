@@ -366,7 +366,7 @@ namespace AyanaTests
                 personalMessage = "Test message"
             };
 
-            var result = await controller.SaveOrderData(order, userId, paymentForOrder,totalWithDiscount);
+            var result = await controller.SaveOrderData(order, userId, paymentForOrder,totalWithDiscount,new DateTime());
 
             Assert.IsNotNull(result);
             Assert.AreEqual(result.TotalAmountToPay, totalWithDiscount);
@@ -519,14 +519,14 @@ namespace AyanaTests
                       }
             );
 
-            controller.Setup(c => c.SaveOrderData(It.IsAny<Order>(), It.IsAny<string>(), It.IsAny<Payment>(), It.IsAny<double>()))
+            controller.Setup(c => c.SaveOrderData(It.IsAny<Order>(), It.IsAny<string>(), It.IsAny<Payment>(), It.IsAny<double>(), It.IsAny<DateTime>()))
                       .ReturnsAsync(new Order
                       {
                           DeliveryDate = DateTime.Now,
                           personalMessage = "Test message",
                       });
 
-            controller.Setup(c => c.ProcessCartItems(It.IsAny<string>(), It.IsAny<Order>()))
+            controller.Setup(c => c.ProcessCartItems(It.IsAny<string>(), It.IsAny<Order>(), It.IsAny<DateTime>()))
                       .Returns(Task.CompletedTask);
 
             controller.Object.ControllerContext = new ControllerContext
@@ -616,7 +616,7 @@ namespace AyanaTests
 
             dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
 
-            await controller.ProcessCartItems(userId, order);
+            await controller.ProcessCartItems(userId, order,new DateTime());
 
             foreach (var cart in cartList)
             {
