@@ -37,7 +37,6 @@ namespace AyanaTests
         [TestInitialize]
         public void Initialize()
         {
-            // Konfiguracija UserManager-a
             var userStore = new Mock<IUserStore<ApplicationUser>>();
             _mockUserManager = new Mock<UserManager<ApplicationUser>>(
                 userStore.Object,
@@ -54,7 +53,6 @@ namespace AyanaTests
             _mockEmailService = new Mock<IEmailService>();
             _mockDbContext = new Mock<ApplicationDbContext>();
 
-            // Konfiguracija RoleManager-a
             var roleStore = new Mock<IRoleStore<IdentityRole>>();
             var roleManager = new RoleManager<IdentityRole>(
                 roleStore.Object,
@@ -77,7 +75,6 @@ namespace AyanaTests
         [TestMethod]
         public void InputModel_Email_ShouldBeRequired()
         {
-            // Arrange
             var inputModel = new RegisterModel.InputModel
             {
                 Email = null,
@@ -89,11 +86,9 @@ namespace AyanaTests
 
             var validationContext = new ValidationContext(inputModel, null, null);
 
-            // Act
             var validationResults = new List<ValidationResult>();
             Validator.TryValidateObject(inputModel, validationContext, validationResults, true);
 
-            // Assert
             var emailValidationResult = validationResults.FirstOrDefault(v => v.MemberNames.Contains("Email"));
             Assert.IsNotNull(emailValidationResult);
             Assert.AreEqual("The Email field is required.", emailValidationResult.ErrorMessage);
@@ -103,7 +98,6 @@ namespace AyanaTests
         [TestMethod]
         public async Task OnGetAsync_SetsReturnUrlAndExternalLogins()
         {
-            // Arrange
             var returnUrl = "/some-return-url";
             var externalAuthSchemes = new List<AuthenticationScheme>()
             {
@@ -126,10 +120,8 @@ namespace AyanaTests
             _mockSignInManager.Setup(x => x.GetExternalAuthenticationSchemesAsync())
                 .ReturnsAsync(externalAuthSchemes);
 
-            // Act
             await _registerModel.OnGetAsync(returnUrl);
 
-            // Assert
             Assert.AreEqual(returnUrl, _registerModel.ReturnUrl);
 
             Assert.IsNotNull(_registerModel.ExternalLogins);
@@ -165,6 +157,5 @@ namespace AyanaTests
            
         }
 
-       
     }
 }

@@ -17,7 +17,6 @@ using Microsoft.Extensions.FileSystemGlobbing.Internal;
 
 namespace AyanaTests
 {
-    //written by: Almedin Pašalić
     [TestClass]
     public class ProductsControllerTests
     {
@@ -185,9 +184,6 @@ namespace AyanaTests
             Assert.IsNotNull(model);
             CollectionAssert.AreEqual(testData, model);
         }
-
-        
-        
 
         //written by: Almedin Pašalić
         [TestMethod]
@@ -585,7 +581,7 @@ namespace AyanaTests
             Assert.AreEqual("Index", redirectResult.ActionName);
         }
 
-
+        
         //written by: Vedran Mujić
         public static IEnumerable<object[]> GetTestDataCsv()
         {
@@ -675,7 +671,7 @@ namespace AyanaTests
         //written by: Almedin Pašalić
         [TestMethod]
         [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
-        public async Task Details_DataDrivenTest(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        public async Task Details_ShouldReturnViewWithCorrectProduct(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
         {
             var product = new Product
             {
@@ -722,7 +718,7 @@ namespace AyanaTests
         //written by: Vedran Mujić
         [TestMethod]
         [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
-        public async Task Create_DataDrivenTest(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        public async Task Create_ShouldRedirectToAction(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
         {
             var product = new Product
             {
@@ -760,12 +756,10 @@ namespace AyanaTests
             Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
         }
 
-
-
         //written by: Vedran Mujić
         [TestMethod]
         [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
-        public async Task Create_WithError_DataDrivenTest(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        public async Task Create_WithError(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
         {
             var product = new Product
             {
@@ -805,24 +799,6 @@ namespace AyanaTests
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
-
 
 }

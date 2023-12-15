@@ -14,13 +14,10 @@ namespace AyanaTests
         [TestMethod]
         public void GetStatus_ShouldReturnGuest()
         {
-            // Arrange
             GuestState yourInstance = new GuestState(); 
 
-            // Act
             string result = yourInstance.GetStatus();
 
-            // Assert
             Assert.AreEqual("Guest", result);
         }
     }

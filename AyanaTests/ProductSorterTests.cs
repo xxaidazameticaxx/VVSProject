@@ -29,16 +29,14 @@ namespace AyanaTests
         {
             pattern = new ProductSorter();
         }
+
         //written by Vedran Mujić and Almedin Pašalić
         [TestMethod]
         public void SetSortStrategy_ShouldSetSortStrategy()
         {
-        
             var mockSortStrategy = new Mock<ISort>();
 
-
             pattern.SetSortStrategy(mockSortStrategy.Object);
-
             
             Assert.AreEqual(mockSortStrategy.Object, pattern.GetSortStrategy()); 
         }
@@ -108,9 +106,6 @@ namespace AyanaTests
             CollectionAssert.AreEqual(productList.OrderBy(p => p.Name).ToList(), resultAsc);
             CollectionAssert.AreEqual(productList.OrderByDescending(p => p.Name).ToList(), resultDsc);
             CollectionAssert.AreEqual(productList.OrderBy(p => p.Name).ToList(), resultInvalid);
-
-
-
         }
     }
 }

@@ -396,7 +396,7 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-
+            
             var result = controller.Index();
 
             Assert.IsInstanceOfType(result, typeof(ViewResult));
@@ -432,7 +432,6 @@ namespace AyanaTests
         [TestMethod]
         public void AboutUs_ShouldReturnViewResult()
         {
-            // Arrange
             var dbContextMock = new Mock<ApplicationDbContext>();
             var orderList = new List<Order> { };
 
@@ -442,15 +441,12 @@ namespace AyanaTests
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
             orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
 
-
             dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             var result = controller.AboutUs();
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
