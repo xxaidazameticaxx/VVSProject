@@ -70,7 +70,6 @@ namespace AyanaTests
             dbContextMock.Setup(d => d.Update(It.IsAny<Product>()))
     .Callback<Product>(updatedProduct =>
     {
-        // Pratite promjene na atributima objekta Product
         var productId = updatedProduct.ProductID;
         var updatedName = updatedProduct.Name;
         var updatedImageUrl = updatedProduct.ImageUrl;
@@ -81,7 +80,6 @@ namespace AyanaTests
         var updatedDescription = updatedProduct.Description;
         var updatedProductType = updatedProduct.productType;
 
-        // Ovdje možete dodati logiku prema potrebi ili pratiti promjene.
     });
 
             dbContextMock.Setup(d => d.SaveChanges())
@@ -97,12 +95,11 @@ namespace AyanaTests
         [TestMethod]
         public async Task EditNameAndPrice_ShouldUpdateNameAndPriceAndSaveChanges()
         {
-            // Arrange
             var productId = 1;
 
             var novi = new Product
             {
-                ProductID = 1, // Promijenite ID kako biste odabrali postojeći proizvod
+                ProductID = 1, 
                 Name = "LUDOLINO",
                 ImageUrl = "url1",
                 Price = 12,
@@ -113,17 +110,13 @@ namespace AyanaTests
                 productType = "Type A"
             };
 
-            // Act
             await pattern.EditNameAndPrice(productId, novi);
 
-            // Assert
             dbContextMock.Verify(d => d.Update(It.IsAny<Product>()), Times.Once);
             dbContextMock.Verify(d => d.SaveChanges(), Times.Once);
 
-            // Verify that the existing product is updated with the new name and price
             Assert.AreEqual(novi.Name, testData[0].Name);
             Assert.AreEqual(novi.Price, testData[0].Price);
-            // Ostali atributi također mogu biti uspoređeni ako je potrebno
         }
 
         //written by Vedran Mujić
@@ -131,15 +124,10 @@ namespace AyanaTests
         [TestMethod]
         public void GetAllProducts_ShouldReturnAllProducts()
         {
-           
-
-            // Act
             var result = pattern.GetAllProducts();
 
-            // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count); // Promijenite broj prema vašem stvarnom testnom skupu podataka
-                                              // Dodatne provjere po potrebi
+            Assert.AreEqual(2, result.Count); 
         }
 
         public static IEnumerable<object[]> GetTestDataCsv()
@@ -203,9 +191,7 @@ namespace AyanaTests
             dbContextMock.Verify(d => d.Update(It.IsAny<Product>()), Times.Once);
             dbContextMock.Verify(d => d.SaveChanges(), Times.Once);
 
-
         }
-
 
     }
 }
