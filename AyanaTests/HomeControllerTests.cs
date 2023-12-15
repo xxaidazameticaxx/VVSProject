@@ -21,6 +21,10 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using System.Xml.Linq;
+using System.Collections;
+using System.IO.Pipelines;
+using Microsoft.CodeAnalysis;
 
 namespace AyanaTests
 {
@@ -114,6 +118,7 @@ namespace AyanaTests
             Assert.AreEqual(18.0, result[2].Price, "Third product should have the third-highest price");
         }
 
+
         // written by : Ilhan Hasičić
         [TestMethod]
         public void BirthdayBestSellers_ShouldReturnTop3BirthdayBestSellingProducts()
@@ -147,17 +152,39 @@ namespace AyanaTests
             Assert.AreEqual(3, result.Count, "Should return top 3 birthday best-selling products");
         }
 
+        public static IEnumerable<object[]> GetTestDataCsv()
+        {
+            string csvFilePath = @"C:\Users\ILHAN\source\repos\VVSProject\AyanaTests\TestData\Orders.csv";
+
+            foreach (var line in File.ReadLines(csvFilePath).Skip(1))
+            {
+                var values = line.Split(',');
+
+                int orderId = int.Parse(values[0]);
+                int orderRating = int.Parse(values[1]);
+                int expectedRating = int.Parse(values[2]);
+                
+
+                yield return new object[] { orderId, orderRating, expectedRating };
+            }
+        }
+
         // written by : Ilhan Hasičić
         [TestMethod]
-        public void OverallRating_ShouldCalculateAverageRating()
+        [DynamicData(nameof(GetTestDataCsv), DynamicDataSourceType.Method)]
+        public void OverallRating_ShouldCalculateAverageRating(int orderId, int orderRating, int expectedRating)
         {
+
+            var order = new Order
+            {
+                OrderID = orderId,
+                Rating = orderRating
+                
+            };
             // Arrange
             var orderList = new List<Order>
             {
-                new Order { OrderID = 1, Rating = 4 },
-                new Order { OrderID = 2, Rating = 5 },
-                new Order { OrderID = 3, Rating = 3 },
-                new Order { OrderID = 4, Rating = null }, // Should be ignored in the calculation
+               order
             };
 
             var orderDbSetMock = new Mock<DbSet<Order>>();
@@ -177,7 +204,7 @@ namespace AyanaTests
             // Assert
             var result = controller.ViewBag.rating;
             Assert.IsNotNull(result, "ViewBag.rating should not be null");
-            Assert.AreEqual(4, result, "Should calculate the correct average rating");
+            Assert.AreEqual(expectedRating, result, "Should calculate the correct average rating");
         }
 
         // written by : Ilhan Hasičić
@@ -248,17 +275,39 @@ namespace AyanaTests
         }
 
         // written by : Ilhan Hasičić
+        public static IEnumerable<object[]> GetTestData()
+        {
+            string xmlFilePath = @"C:\Users\ILHAN\source\repos\VVSProject\AyanaTests\TestData\Products.xml";
+
+            XDocument doc = XDocument.Load(xmlFilePath);
+
+            foreach (var productElement in doc.Descendants("Product"))
+            {
+                int productId = int.Parse(productElement.Element("ProductID").Value);
+                string productName = productElement.Element("Name").Value;
+                string category = productElement.Element("Category").Value;
+
+                yield return new object[] { productId, productName, category};
+            }
+        }
+
+        // written by : Ilhan Hasičić
         [TestMethod]
-        public void Category_ShouldReturnZeroProductsInCategory()
+        [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
+        public void Category_ShouldReturnZeroProductsInCategory(int productId, string productName, string category)
         {
             // Arrange
-            var category = "";
-            var productList = new List<Product>
+            var emptyCategory = "";
+
+            var product = new Product
             {
-                new Product { ProductID = 1, Name = "Product1", Category = "Category1" },
-                new Product { ProductID = 2, Name = "Product2", Category = "Category1" },
-                new Product { ProductID = 3, Name = "Product3", Category = "OtherCategory" },
+                ProductID = productId,
+                Name = productName,
+                Category = category,
+               
             };
+
+            var productList = new List<Product> { product };
 
             var productDbSetMock = new Mock<DbSet<Product>>();
             productDbSetMock.As<IQueryable<Product>>().Setup(m => m.GetEnumerator()).Returns(productList.GetEnumerator());
@@ -269,12 +318,12 @@ namespace AyanaTests
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
             // Act
-            var result = controller.Category(category);
+            var result = controller.Category(emptyCategory);
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(List<Product>));
             var list = (List<Product>)result;
-            Assert.AreEqual(0, list.Count, $"Should return 0 products in category '{category}'");
+            Assert.AreEqual(0, list.Count, $"Should return 0 products in category '{emptyCategory}'");
             Assert.AreEqual(null, controller.ViewBag.Category, "Should set ViewBag.Category to the correct category");
             Assert.IsNull(controller.ViewBag.Products, "Should set ViewBag.Products to null for 0 products");
         }
