@@ -1,7 +1,9 @@
-﻿using Ayana.Controllers;
+﻿using System.Xml.Linq;
+using Ayana.Controllers;
 using Ayana.Data;
 using Ayana.Models;
 using Ayana.Paterni;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 
 namespace AyanaTests
@@ -45,13 +47,28 @@ namespace AyanaTests
             Assert.AreEqual("employeeId", report.EmployeeID);
         }
 
+        public static IEnumerable<object[]> GetXmlTestData()
+        {
+            // Read data from the CSV file
+            var doc = XDocument.Load("../../../TestData/ReportTypes.xml");
+
+            foreach (var type in doc.Descendants("ReportType"))
+            {
+                int reportId = int.Parse(type.Element("id").Value);
+                string reportName = type.Element("Name").Value;
+
+                yield return new object[] { reportId, reportName };
+            }
+        }
+
         // written by : Lejla Heleg
         [TestMethod]
-        public void CreateReport_ReturnsFileResult()
+        [DynamicData(nameof(GetXmlTestData), DynamicDataSourceType.Method)]
+        public void CreateReport_DifferentReportTypes_ReturnsFileResult(int id, string name)
         {
-            var result = controller.CreateReport("weekly");
+            var result = controller.CreateReport(name);
 
-            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(FileResult));
         }
     }
 }
