@@ -23,4 +23,10 @@
     <ProjectReference Include="..\Ayana\Ayana.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestData\PaymentTestData.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

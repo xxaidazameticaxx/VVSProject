@@ -7,6 +7,7 @@ using Ayana.Paterni;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 namespace AyanaTests
 {
@@ -307,8 +308,7 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        [DataRow(123, "Address123", 0)]
-        [DataRow(null,"Address456", 1)]
+        [DynamicData(nameof(PaymentXmlData), DynamicDataSourceType.Method)]
         public async Task SavePaymentData_ShouldSavePaymentCorrectly(int? bankAccount, string deliveryAddress, PaymentType paymentType)
         {
             var payment = new Payment
@@ -324,12 +324,33 @@ namespace AyanaTests
             var result = await controller.SavePaymentData(payment, totalWithDiscount, discountId);
 
             Assert.IsNotNull(result);
-            Assert.IsNotNull(result);
             Assert.AreEqual(result.BankAccount,bankAccount);
             Assert.AreEqual(result.DeliveryAddress, deliveryAddress);
             Assert.AreEqual(result.PaymentType, paymentType);
             Assert.AreEqual(result.PayedAmount, totalWithDiscount);
             Assert.AreEqual(result.DiscountID, discountId);
+        }
+
+        public static IEnumerable<object[]> PaymentXmlData()
+        {
+            var xmlFilePath = "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject-needs refactor\\VVSProject\\AyanaTests\\TestData\\PaymentTestData.xml";
+            var xmlData = XDocument.Load(xmlFilePath);
+
+            return xmlData.Root.Elements("PaymentData").Select(data =>
+            {
+                return new object[]
+                {
+                    ParseNullableInt(data.Attribute("bankAccount")?.Value),
+                    data.Attribute("deliveryAddress")?.Value,
+                    (PaymentType)Enum.Parse(typeof(PaymentType), data.Attribute("paymentType")?.Value ?? "0")
+
+                };
+            });
+        }
+
+        private static int? ParseNullableInt(string value)
+        {
+            return string.IsNullOrEmpty(value) ? (int?)null : int.Parse(value);
         }
 
         // written by : Aida Zametica
@@ -369,9 +390,8 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
-        [DataRow("0")]
-        [DataRow("1")]
-        public void Cart_RedirectActionToCart_ShouldUpdateViewBagCorrectly(string discountType)
+        [DynamicData(nameof(GetTestDataCsv), DynamicDataSourceType.Method)]
+        public void Cart_RedirectActionToCart_ShouldUpdateViewBagCorrectly(string Code,string Type,string Amount)
         {
             var cartList = new List<Cart>
             {
@@ -411,7 +431,7 @@ namespace AyanaTests
                 HttpContext = new DefaultHttpContext { User = userMock.Object }
             };
 
-            controllerMock.Object.Cart("10", discountType, "DISCOUNTCODE");
+            controllerMock.Object.Cart(Amount, Type, Code);
 
             var viewBag = controllerMock.Object.ViewBag;
 
@@ -421,6 +441,22 @@ namespace AyanaTests
             var totalAmountToPay = viewBag.TotalAmountToPay as double?;
 
             controllerMock.Verify(c => c.GetCartProducts(It.IsAny<List<Cart>>()), Times.Once);
+        }
+
+        public static IEnumerable<object[]> GetTestDataCsv()
+        {
+            string csvFilePath = @"C:\Users\Aida\OneDrive - Faculty of Electrical Engineering Sarajevo\Desktop\VVSProject-needs refactor\VVSProject\AyanaTests\TestData\DiscountTestData.csv";
+
+            foreach (var line in File.ReadLines(csvFilePath).Skip(1))
+            {
+                var values = line.Split(',');
+
+                string Code = values[0];
+                string Type = values[1];
+                string Amount = values[2];
+
+                yield return new object[] {Code,Type,Amount};
+            }
         }
 
         // written by : Aida Zametica

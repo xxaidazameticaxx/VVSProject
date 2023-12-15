@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Payments>
+	<PaymentData>
+		<BankAccount>123</BankAccount>
+		<DeliveryAddress>Address123</DeliveryAddress>
+		<PaymentType>0</PaymentType>
+	</PaymentData>
+	<PaymentData>
+		<BankAccount></BankAccount>
+		<DeliveryAddress>Address456</DeliveryAddress>
+		<PaymentType>1</PaymentType>
+	</PaymentData>
+</Payments>
