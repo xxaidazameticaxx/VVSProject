@@ -47,7 +47,6 @@ namespace AyanaTests
         [TestMethod]
         public void CategoryView_ShouldReturnFilteredProducts()
         {
-            // Arrange
             var category = "Birthday";
             var flowerType = "Rose";
             var productList = new List<Product>
@@ -68,10 +67,8 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             var result = controller.CategoryView(category);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
             var viewResult = (ViewResult)result;
             Assert.IsInstanceOfType(viewResult.Model, typeof(List<Product>));
@@ -85,7 +82,6 @@ namespace AyanaTests
         [TestMethod]
         public void BestSellers_ShouldReturnTop3ProductsByPrice()
         {
-            // Arrange
         var productList = new List<Product>
         {
             new Product { ProductID = 1, Name = "Product1", Price = 20.0 },
@@ -106,11 +102,9 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             controller.BestSellers();
             var result = controller.ViewBag.BestSellers as List<Product>;
 
-            // Assert
             Assert.IsNotNull(result, "BestSellers should not be null");
             Assert.AreEqual(3, result.Count, "Should return top 3 best-selling products by price");
             Assert.AreEqual(25.0, result[0].Price, "First product should have the highest price");
@@ -123,7 +117,7 @@ namespace AyanaTests
         [TestMethod]
         public void BirthdayBestSellers_ShouldReturnTop3BirthdayBestSellingProducts()
         {
-            // Arrange
+
             var productList = new List<Product>
             {
                 new Product { ProductID = 1, Name = "Product1", Category = "Birthday", Price = 20 },
@@ -143,10 +137,8 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             controller.BirthdayBestSellers();
 
-            // Assert
             var result = controller.ViewBag.BirthdayBestSellers as List<Product>;
             Assert.IsNotNull(result, "ViewBag.BirthdayBestSellers should not be null");
             Assert.AreEqual(3, result.Count, "Should return top 3 birthday best-selling products");
@@ -181,7 +173,7 @@ namespace AyanaTests
                 Rating = orderRating
                 
             };
-            // Arrange
+           
             var orderList = new List<Order>
             {
                order
@@ -198,10 +190,8 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             controller.OverallRating();
 
-            // Assert
             var result = controller.ViewBag.rating;
             Assert.IsNotNull(result, "ViewBag.rating should not be null");
             Assert.AreEqual(expectedRating, result, "Should calculate the correct average rating");
@@ -211,7 +201,7 @@ namespace AyanaTests
         [TestMethod]
         public void Category_ShouldReturnProductsInCategory()
         {
-            // Arrange
+
             var category = "Category1";
             var productList = new List<Product>
             {
@@ -232,10 +222,8 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             var result = controller.Category(category);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(List<Product>));
             var list = (List<Product>)result;
             Assert.AreEqual(2, list.Count, $"Should return 2 products in category '{category}'");
@@ -245,7 +233,7 @@ namespace AyanaTests
         [TestMethod]
         public void CategoryView_ShouldReturnEmptyListForNullResults()
         {
-            // Arrange
+
             var category = "";
             var productList = new List<Product>
             {
@@ -262,10 +250,8 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             var result = controller.CategoryView(category);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
             var viewResult = (ViewResult)result;
 
@@ -296,7 +282,7 @@ namespace AyanaTests
         [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
         public void Category_ShouldReturnZeroProductsInCategory(int productId, string productName, string category)
         {
-            // Arrange
+
             var emptyCategory = "";
 
             var product = new Product
@@ -317,10 +303,8 @@ namespace AyanaTests
 
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
 
-            // Act
             var result = controller.Category(emptyCategory);
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(List<Product>));
             var list = (List<Product>)result;
             Assert.AreEqual(0, list.Count, $"Should return 0 products in category '{emptyCategory}'");
@@ -332,13 +316,10 @@ namespace AyanaTests
         [TestMethod]
         public void Privacy_ShouldReturnView()
         {
-            // Arrange
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
 
-            // Act
             var result = controller.Privacy();
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult), "Privacy action should return a ViewResult");
         }
 
@@ -346,13 +327,11 @@ namespace AyanaTests
         [TestMethod]
         public void Help_ShouldReturnView()
         {
-            // Arrange
+
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
 
-            // Act
             var result = controller.Help();
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult), "Help action should return a ViewResult");
         }
 
@@ -360,13 +339,11 @@ namespace AyanaTests
         [TestMethod]
         public void DeliveryPolicy_ShouldReturnView()
         {
-            // Arrange
+
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
 
-            // Act
             var result = controller.DeliveryPolicy();
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult), "DeliveryPolicy action should return a ViewResult");
         }
 
@@ -374,13 +351,11 @@ namespace AyanaTests
         [TestMethod]
         public void SignIn_ShouldReturnView()
         {
-            // Arrange
+
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
 
-            // Act
             var result = controller.SignIn();
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult), "SignIn action should return a ViewResult");
         }
 
@@ -388,13 +363,11 @@ namespace AyanaTests
         [TestMethod]
         public void Subscription_ShouldReturnView()
         {
-            // Arrange
+
             var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), _dbContextMock.Object);
 
-            // Act
             var result = controller.Subscription();
 
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult), "Subscription action should return a ViewResult");
         }
 
@@ -482,11 +455,11 @@ namespace AyanaTests
         }
 
 
-
+        // written by: Hasičić Ilhan
         [TestMethod]
         public void ErrorTest()
         {
-            // Mock HttpContext
+
             var dbContextMock = new Mock<ApplicationDbContext>();
             var httpContextMock = new Mock<HttpContext>();
             httpContextMock.Setup(c => c.TraceIdentifier).Returns("test_trace_id");
@@ -501,20 +474,13 @@ namespace AyanaTests
 
             var result = controller.Error() as ViewResult;
 
-            // Provjeri da li je rezultat tipa ViewResult
             Assert.IsNotNull(result);
 
-            // Provjeri da li je model ErrorViewModel
             Assert.IsInstanceOfType(result.Model, typeof(ErrorViewModel));
 
-            // Provjeri da li su podaci modela ispravni
             var model = result.Model as ErrorViewModel;
             Assert.AreEqual("test_trace_id", model.RequestId);
         }
-
-
-
-
 
 
     }
