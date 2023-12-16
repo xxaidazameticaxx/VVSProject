@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Linq.Expressions;
+using System.Security.Claims;
 using Ayana.Controllers;
 using Ayana.Data;
 using Ayana.Models;
@@ -287,6 +288,32 @@ namespace AyanaTests
 
             await controller.ProcessOrderCancellationAsync(orderToDelete);
         }
+
+        [TestMethod]
+        public void GetUserOrders_ReturnsUserSpecificOrders()
+        {
+            string userId = "userId";
+            var today = DateTime.Today;
+            var expectedUserOrders = new List<Order>
+            {
+                new Order { OrderID = 1, CustomerID = userId, DeliveryDate = today.AddDays(1) },
+                new Order { OrderID = 2, CustomerID = userId, DeliveryDate = today.AddDays(2) },
+            };
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(expectedUserOrders.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(expectedUserOrders.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(expectedUserOrders.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(expectedUserOrders.GetEnumerator());
+
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var result = controller.GetUserOrders(userId);
+
+            CollectionAssert.AreEqual(expectedUserOrders, result.ToList());
+        }
+
+
 
     }
 }
