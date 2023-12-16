@@ -73,9 +73,12 @@ namespace Ayana.Controllers
                 .OrderBy(o => o.DeliveryDate)
                 .ToList();
 
+            // Get the associated products for each order
+            List<List<Product>> orderProducts = GetOrderProducts(userOrders);
 
             // Pass the userOrders and orderProducts to the view
             ViewBag.UserOrders = userOrders;
+            ViewBag.OrderProducts = orderProducts;
 
             // Render the view
             return View("ActiveOrders");
@@ -97,7 +100,7 @@ namespace Ayana.Controllers
             var orderToDelete = await _context.Orders.FindAsync(order.OrderID);
             if (orderToDelete == null)
             {
-                return View("ActiveOrders");
+                return NotFound();
             }
 
             // Check if the delivery date is less than 3 days before today
@@ -128,7 +131,7 @@ namespace Ayana.Controllers
             // Retrieve user-specific orders based on the CustomerId
             List<Order> userOrders = _context.Orders
                 .Include(o => o.Payment)
-                .Where(o => o.CustomerID != userId && o.DeliveryDate >= today)
+                .Where(o => o.CustomerID == userId && o.DeliveryDate >= today)
                 .OrderBy(o => o.DeliveryDate)
                 .ToList();
 
