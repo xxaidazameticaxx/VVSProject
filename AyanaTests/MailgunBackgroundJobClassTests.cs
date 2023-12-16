@@ -10,7 +10,7 @@ namespace AyanaTests
         public static IEnumerable<object[]> GetCsvTestData()
         {
             // Read data from the CSV file
-            var lines = File.ReadAllLines("../../../TestData/ApplicationUsers.csv");
+            var lines = File.ReadAllLines("C:\\Users\\User\\OneDrive\\Desktop\\vvs1\\VVSProject\\AyanaTests\\TestData\\ApplicationUsers.csv");
 
             // Skip the header line and convert data to object arrays for parameterized testing
             foreach (var line in lines.Skip(1))

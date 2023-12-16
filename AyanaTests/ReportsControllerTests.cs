@@ -50,7 +50,7 @@ namespace AyanaTests
         public static IEnumerable<object[]> GetXmlTestData()
         {
             // Read data from the CSV file
-            var doc = XDocument.Load("../../../TestData/ReportTypes.xml");
+            var doc = XDocument.Load("C:\\Users\\User\\OneDrive\\Desktop\\vvs1\\VVSProject\\AyanaTests\\TestData\\ReportTypes.xml");
 
             foreach (var type in doc.Descendants("ReportType"))
             {
