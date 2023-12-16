@@ -7,6 +7,8 @@ using Ayana.Data;
 using Ayana.Models;
 using System.Security.Claims;
 using Ayana.Paterni;
+using Microsoft.EntityFrameworkCore;
+using static Humanizer.In;
 
 namespace Ayana.Controllers
 {
@@ -387,6 +389,63 @@ namespace Ayana.Controllers
             ViewBag.OrderType = orderType;
             return View();
         }
+
+        // GET: Subscriptions/Details/5
+        public Task<IActionResult> SubscriptionOrder(string name, double price)
+        {
+            ViewBag.SubscriptionName = name;
+            ViewBag.SubscriptionPrice = Math.Round(price, 2);
+
+            return Task.FromResult<IActionResult>(View());
+        }
+
+
+        // POST: DtoRequests/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubscriptionCreate([Bind("Name,Price,personalMessage,DeliveryDate")] Subscription subscription, [Bind("DeliveryAddress,BankAccount,PaymentType")] Payment payment)
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                throw new ArgumentNullException(nameof(userId));
+            }
+
+            // Create payment for the subscription
+            Payment paymentForSubscription = await SavePaymentData(payment, subscription.Price, null);
+
+            var subsType = SubscriptionType.Month;
+
+            if (subscription.Name == "Three month Package")
+                subsType = SubscriptionType.ThreeMonth;
+            else if (subscription.Name == "Six month Package")
+                subsType = SubscriptionType.SixMonth;
+
+            // Set up the payment instance
+            Subscription newSubscription = new Subscription
+            {
+                Name = subscription.Name,
+                DeliveryDate = subscription.DeliveryDate,
+                SubscriptionType = subsType,
+                CustomerID = userId,
+                PaymentID = paymentForSubscription.PaymentID,
+                Price = subscription.Price,
+                personalMessage = subscription.personalMessage
+
+            };
+
+            // Save the subscription to the database
+            _context.Add(newSubscription);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("ThankYou", new { orderType = "subscription" });
+        }
+
+
+
 
     }
 }
