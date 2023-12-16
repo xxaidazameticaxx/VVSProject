@@ -140,74 +140,49 @@ namespace AyanaTests
             Assert.AreEqual(testOrder.Rating, updatedOrder.Rating, "The order rating should be updated to 5.");
         }
 
-        //novo
 
         [TestMethod]
         public void ActiveOrders_ShouldReturnViewWithCorrectData()
         {
-            // Arrange
-            // Setup the necessary data in your mock context
-
-            // Act
             var result = controller.ActiveOrders() as ViewResult;
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("ActiveOrders", result.ViewName);
-
-            // Add more assertions as needed
         }
-
-       
-
 
         [TestMethod]
         public async Task CancelOrder_OrderDoesNotExist_ShouldReturnNotFound()
         {
-            // Arrange
             userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, "userId"));
 
-            // Setup the necessary data in your mock context
-
-            // Simulate that the order does not exist in the database
-
-            // Act
             var result = await controller.CancelOrder(new Order { OrderID = 158 }) as NotFoundResult;
 
-            // Assert
             Assert.IsNotNull(result);
         }
 
         [TestMethod]
-        public void GetUserOrders_ShouldReturnUserSpecificOrders()
+        public void GetUserOrders_ReturnsUserSpecificOrders()
         {
-            // Arrange
-            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, "userId"));
+            string userId = "userId";
+            var today = DateTime.Today;
+            var expectedUserOrders = new List<Order>
+            {
+                new Order { OrderID = 1, CustomerID = userId, DeliveryDate = today.AddDays(1) },
+                new Order { OrderID = 2, CustomerID = userId, DeliveryDate = today.AddDays(2) },
+            };
+            
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(expectedUserOrders.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(expectedUserOrders.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(expectedUserOrders.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(expectedUserOrders.GetEnumerator());
 
-            // Set up user-specific orders in your mock context
-            var userSpecificOrders = new List<Order>
-    {
-        new Order { OrderID = 1, CustomerID = "userId", DeliveryDate = DateTime.Now.AddDays(1) },
-        new Order { OrderID = 2, CustomerID = "userId", DeliveryDate = DateTime.Now.AddDays(2) },
-        new Order { OrderID = 3, CustomerID = "otherUserId", DeliveryDate = DateTime.Now.AddDays(3) },
-    };
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
 
-            dbContextMock.Setup(d => d.Orders.Include(It.IsAny<Expression<Func<Order, object>>>()))
-                        .ReturnsDbSet(userSpecificOrders);
+            var result = controller.GetUserOrders(userId);
 
-            // Act
-            var result = controller.GetUserOrders("userId");
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count);  // User-specific orders should only include orders for the specified user
-            Assert.AreEqual(1, result[0].OrderID);  // Assuming orders are ordered by DeliveryDate ascending
-            Assert.AreEqual(2, result[1].OrderID);
+            CollectionAssert.AreEqual(expectedUserOrders, result.ToList());
         }
-
-
-
-
 
     }
 }
