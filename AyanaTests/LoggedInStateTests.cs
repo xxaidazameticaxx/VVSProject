@@ -19,6 +19,8 @@ namespace AyanaTests
             pattern = new LoggedInState();
         }
 
+        //written by Vedran Mujić
+
         [TestMethod]
         public void GetStatus_ShouldReturnLoggedIn()
         {
@@ -29,6 +31,8 @@ namespace AyanaTests
             Assert.AreEqual("Logged In", status);
         }
 
+        //written by Vedran Mujić
+
         [TestMethod]
         public void CanPurchase_ShouldReturnTrue()
         {
@@ -38,6 +42,8 @@ namespace AyanaTests
             // Assert
             Assert.IsTrue(canPurchase);
         }
+
+        //written by Vedran Mujić
 
         [TestMethod]
         public void CanView_ShouldReturnTrue()

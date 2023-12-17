@@ -52,7 +52,9 @@ namespace AyanaTests
                 _mockUserManager.Object,
                 _mockEmailSender.Object);
         }
-
+        
+        //written by Vedran Mujić
+        
         [TestMethod]
         public async Task OnGetAsync_ValidEmail_ReturnsPageResult()
         {
@@ -68,6 +70,9 @@ namespace AyanaTests
             // Assert
             Assert.IsInstanceOfType(result, typeof(PageResult));
         }
+
+        
+        //written by Vedran Mujić
         [TestMethod]
         public async Task OnGetAsync_UserIsNull_ReturnsNotFound()
         {
@@ -87,6 +92,8 @@ namespace AyanaTests
             Assert.AreEqual($"Unable to load user with email '{email}'.", notFoundResult.Value);
         }
 
+        //written by Vedran Mujić
+
         [TestMethod]
         public async Task OnGetAsync_EmailIsNull_ReturnsRedirectToPageIndex()
         {
@@ -102,6 +109,8 @@ namespace AyanaTests
             var redirectResult = (RedirectToPageResult)result;
             Assert.AreEqual("/Index", redirectResult.PageName);
         }
+
+        //written by Vedran Mujić
 
         [TestMethod]
         public async Task OnGetAsync_ValidEmail_SetsPropertiesCorrectly()
@@ -125,6 +134,8 @@ namespace AyanaTests
             Assert.IsNull(_registerConfirmationModel.EmailConfirmationUrl);
 
         }
+
+        //written by Vedran Mujić
 
         [TestMethod]
         public async Task OnPostAsync_UserIsNull_ReturnsNotFound()
@@ -152,8 +163,8 @@ namespace AyanaTests
             Assert.AreEqual($"Unable to load user with email '{email}'.", notFoundResult.Value);
         }
 
-       
-        
+        //written by Vedran Mujić
+
         [TestMethod]
         public async Task OnPostAsync_ModelStateNotValid_ReturnsPage()
         {
@@ -172,6 +183,8 @@ namespace AyanaTests
             // Assert
             Assert.IsInstanceOfType(result, typeof(PageResult));
         }
+        
+        //written by Vedran Mujić
 
         [TestMethod]
         public async Task OnPostAsync_VerifyCodeFalse_DeletesUserAndReturnsRedirectToRegister()
@@ -203,6 +216,8 @@ namespace AyanaTests
             var redirectResult = (RedirectToPageResult)result;
             Assert.AreEqual("/Account/Register", redirectResult.PageName);
         }
+
+        //written by Vedran Mujić
 
         [TestMethod]
         public async Task OnPostAsync_VerifyCodeTrue_SignsInUserAndReturnsLocalRedirect()
@@ -242,6 +257,8 @@ namespace AyanaTests
             // Ensure user is signed in
             _mockSignInManager.Verify(x => x.SignInAsync(user, false, null), Times.Once);
         }
+
+        //written by Vedran Mujić
 
         [TestMethod]
         public async Task OnPostAsync_VerifyCodeTrue_UpdateUserFails_AddsErrorsToModelState()
