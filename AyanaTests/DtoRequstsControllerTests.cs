@@ -79,7 +79,6 @@ namespace AyanaTests
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext { User = userMock.Object }
-
             };
 
             dbContextMock.Setup(m => m.Remove(It.IsAny<Cart>())).Callback<Cart>((entity) => cartList.Remove(entity));
