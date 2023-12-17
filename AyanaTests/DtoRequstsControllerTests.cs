@@ -41,6 +41,63 @@ namespace AyanaTests
 
         // written by : Aida Zametica
         [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task RemoveItem_WhenUserIdIsNull_ThrowsArgumentNullException()
+        {
+            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+
+            mockHttpContextAccessor.Setup(a => a.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim)null);
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal() }
+            };
+
+            await controller.RemoveItem(0);
+        }
+
+        // added for White Box Testing purposes
+        // written by : Aida Zametica  
+        [TestMethod]
+        public async Task RemoveItem_WhenCartIsNull_RedirectToAction()
+        {
+            var cartList = new List<Cart>
+            {
+                 new Cart { CustomerID = "otherUserId", ProductID = 1, ProductQuantity = 1 },
+                 new Cart { CustomerID = "otherUserId", ProductID = 2, ProductQuantity = 1 },
+
+            };
+
+            var cartDbSetMock = GetDbSetMock(cartList);
+
+            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
+
+            var userMock = new Mock<ClaimsPrincipal>();
+
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+
+            };
+
+            dbContextMock.Setup(m => m.Remove(It.IsAny<Cart>())).Callback<Cart>((entity) => cartList.Remove(entity));
+
+            var result = await controller.RemoveItem(1);
+
+            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+
+            var redirectResult = (RedirectToActionResult)result;
+
+            Assert.AreEqual("Cart", redirectResult.ActionName);
+            Assert.AreEqual(0, redirectResult.RouteValues["discountAmount"]);
+            Assert.AreEqual(1, redirectResult.RouteValues["discountType"]);
+            Assert.AreEqual("", redirectResult.RouteValues["discountCode"]);
+        }
+
+        // written by : Aida Zametica
+        [TestMethod]
         public async Task RemoveItem_WhenProductQuantityMoreThenOne_DecreasesQuantity()
         {
             var cartList = new List<Cart>
@@ -112,24 +169,6 @@ namespace AyanaTests
             var removedCartItem = cartList.SingleOrDefault(c => c.CustomerID == userId && c.ProductID == productId);
             Assert.AreEqual(1, removedCartItem?.ProductQuantity, "The item quantity should have been decreased in the cart.");
 
-        }
-
-
-        // written by : Aida Zametica
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public async Task RemoveItem_WhenUserIdIsNull_ThrowsArgumentNullException()
-        {
-            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
-
-            mockHttpContextAccessor.Setup(a => a.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim)null);
-
-            controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal() }
-            };
-
-            await controller.RemoveItem(0);
         }
 
         // written by : Aida Zametica
@@ -333,7 +372,7 @@ namespace AyanaTests
 
         public static IEnumerable<object[]> PaymentXmlData()
         {
-            var xmlFilePath = "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject-needs refactor\\VVSProject\\AyanaTests\\TestData\\PaymentTestData.xml";
+            var xmlFilePath = "C:\\Users\\Aida\\OneDrive - Faculty of Electrical Engineering Sarajevo\\Desktop\\VVSProject\\AyanaTests\\TestData\\PaymentTestData.xml";
             var xmlData = XDocument.Load(xmlFilePath);
 
             return xmlData.Root.Elements("PaymentData").Select(data =>
@@ -445,7 +484,7 @@ namespace AyanaTests
 
         public static IEnumerable<object[]> GetTestDataCsv()
         {
-            string csvFilePath = @"C:\Users\Aida\OneDrive - Faculty of Electrical Engineering Sarajevo\Desktop\VVSProject-needs refactor\VVSProject\AyanaTests\TestData\DiscountTestData.csv";
+            string csvFilePath = @"C:\Users\Aida\OneDrive - Faculty of Electrical Engineering Sarajevo\Desktop\VVSProject\AyanaTests\TestData\DiscountTestData.csv";
 
             foreach (var line in File.ReadLines(csvFilePath).Skip(1))
             {
