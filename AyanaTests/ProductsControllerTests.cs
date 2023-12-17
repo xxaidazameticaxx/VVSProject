@@ -24,6 +24,8 @@ namespace AyanaTests
         private Mock<ApplicationDbContext> dbContextMock;
         private ProductsController controller;
         private List<Product> testData;
+        private List<Product> listProducts;
+        private List<Product> nullList = null;
 
         private Product testProduct = new Product
         {
@@ -126,6 +128,35 @@ namespace AyanaTests
                         throw new DbUpdateConcurrencyException();
                     }
                 });
+
+            //Initialize lists for "White box" testing
+            listProducts = new List<Product>
+            {
+                new Product
+                {
+                    ProductID = 1,
+                    Name = "Product 1",
+                    ImageUrl = "url1",
+                    Price = 60,
+                    FlowerType = "Rose",
+                    Stock = 10,
+                    Category = "Flowers",
+                    Description = "Beautiful red rose",
+                    productType = "Type A"
+                },
+                new Product
+                {
+                    ProductID = 2,
+                    Name = "Product 2",
+                    ImageUrl = "url2",
+                    Price = 20,
+                    FlowerType = "Lily",
+                    Stock = 15,
+                    Category = "Flowers",
+                    Description = "Elegant white lily",
+                    productType = "Type B"
+                }
+            };
 
             controller = new ProductsController(dbContextMock.Object, iProductMock.Object);
         }
@@ -797,6 +828,120 @@ namespace AyanaTests
             var result = await productsController.Create(testProduct);
 
             Assert.IsInstanceOfType(result, typeof(ViewResult));
+        }
+
+        //White box tests:
+        [TestMethod]
+        public void ProcessProducts_WithProducts_ReturnModifiedList()
+        {
+            var actualList = controller.ProcessProducts(listProducts);
+
+            Assert.AreEqual(54, actualList[0].Price);
+            Assert.AreEqual("Elegant white lily + Besplatan poklon!", actualList[1].Description);
+        }
+
+        [TestMethod]
+        public void ProcessProducts_WithListOfProductsIsNull_ReturnSameList()
+        {
+            var result = controller.ProcessProducts(nullList);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public void ProcessProducts_WithListOfProductsIsNull_ReturnSameList1()
+        {
+            var result = controller.ProcessProducts(new List<Product>());
+
+            CollectionAssert.AreEqual(new List<Product>(),result);
+        }
+
+        [TestMethod]
+        public void ProcessProducts_WithOneProducts_ReturnModifiedListOfProducts()
+        {
+            var listProducts = new List<Product>
+            {
+                new Product
+                {
+                    ProductID = 1,
+                    Name = "Product 1",
+                    ImageUrl = "url1",
+                    Price = 60,
+                    FlowerType = "Rose",
+                    Stock = 10,
+                    Category = "Flowers",
+                    Description = "Beautiful red rose",
+                    productType = "Type A"
+                }
+            };
+
+            var result = controller.ProcessProducts(listProducts);
+
+            Assert.AreEqual(54, result[0].Price);
+        }
+
+        [TestMethod]
+        public void ProcessProducts_WithTwoProducts_ReturnModifiedListOfProducts()
+        {
+            var listProducts = new List<Product>
+            {
+                new Product
+                {
+                    ProductID = 1,
+                    Name = "Product 1",
+                    ImageUrl = "url1",
+                    Price = 60,
+                    FlowerType = "Rose",
+                    Stock = 10,
+                    Category = "Flowers",
+                    Description = "Beautiful red rose",
+                    productType = "Type A"
+                },
+                new Product
+                {
+                    ProductID = 2,
+                    Name = "Product 1",
+                    ImageUrl = "url1",
+                    Price = 80,
+                    FlowerType = "Rose",
+                    Stock = 10,
+                    Category = "Flowers",
+                    Description = "Beautiful red rose",
+                    productType = "Type A"
+                },
+                new Product
+                {
+                    ProductID = 3,
+                    Name = "Product 1",
+                    ImageUrl = "url1",
+                    Price = 90,
+                    FlowerType = "Rose",
+                    Stock = 10,
+                    Category = "Flowers",
+                    Description = "Beautiful red rose",
+                    productType = "Type A"
+                },
+                new Product
+                {
+                    ProductID = 4,
+                    Name = "Product 1",
+                    ImageUrl = "url1",
+                    Price = 100,
+                    FlowerType = "Rose",
+                    Stock = 10,
+                    Category = "Flowers",
+                    Description = "Beautiful red rose",
+                    productType = "Type A"
+                }
+
+            };
+
+            var result = controller.ProcessProducts(listProducts);
+
+            Assert.AreEqual(54, result[0].Price);
+            Assert.AreEqual(72, result[1].Price);
+            Assert.AreEqual(81, result[2].Price);
+            Assert.AreEqual(90, result[3].Price);
         }
 
     }

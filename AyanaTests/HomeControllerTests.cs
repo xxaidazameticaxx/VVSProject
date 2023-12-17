@@ -160,7 +160,7 @@ namespace AyanaTests
                 yield return new object[] { orderId, orderRating, expectedRating };
             }
         }
-
+        
         // written by : Ilhan Hasičić
         [TestMethod]
         [DynamicData(nameof(GetTestDataCsv), DynamicDataSourceType.Method)]
@@ -401,7 +401,7 @@ namespace AyanaTests
 
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
-
+        
         // written by : Aida Zametica
         [TestMethod]
         public void OverallRating_NoOrders_ShouldReturnAverageRatingZero()
@@ -478,6 +478,171 @@ namespace AyanaTests
             Assert.AreEqual("test_trace_id", model.RequestId);
         }
 
+        //White box
+        // Written by : Hasičić Ilhan
+        [TestMethod]
+        public void OverallRating_ShouldCalculateAverageRating()
+        {
+            var orderList = new List<Order>
+    {
+        new Order { OrderID = 1, Rating = 4 },
+        new Order { OrderID = 2, Rating = 5 },
+        new Order { OrderID = 3, Rating = 3 },
+        new Order { OrderID = 4, Rating = null }, // Should be ignored in the calculation
+    };
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+            controller.OverallRating();
+
+            var result = controller.ViewBag.rating;
+            Assert.IsNotNull(result, "ViewBag.rating should not be null");
+            Assert.AreEqual(4, result, "Should calculate the correct average rating");
+        }
+
+        [TestMethod]
+        public void OverallRating_NoNonNullOrders_ShouldSetViewBagRatingToZero()
+        {
+            var orderList = new List<Order>
+    {
+        new Order { OrderID = 1, Rating = null },
+        new Order { OrderID = 2, Rating = null },
+        new Order { OrderID = 3, Rating = null },
+        new Order { OrderID = 4, Rating = null },
+    };
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+            controller.OverallRating();
+
+            var result = controller.ViewBag.rating;
+            Assert.IsNotNull(result, "ViewBag.rating should not be null");
+            Assert.AreEqual(0, result, "Should set ViewBag.rating to 0 when there are no non-null ratings");
+        }
+
+
+        [TestMethod]
+        public void OverallRating_SomeNonNullOrders_ShouldCalculateAverageRating()
+        {
+            var orderList = new List<Order>
+            {
+                new Order { OrderID = 1, Rating = 4 },
+                new Order { OrderID = 2, Rating = null },
+                new Order { OrderID = 3, Rating = 3 },
+                new Order { OrderID = 4, Rating = 5 },
+            };
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+            controller.OverallRating();
+
+            var result = controller.ViewBag.rating;
+            Assert.IsNotNull(result, "ViewBag.rating should not be null");
+            Assert.AreEqual(4, result, "Should calculate the correct average rating considering only non-null ratings");
+        }
+
+        [TestMethod]
+        public void OverallRating_ShouldSetViewBagRatingToZeroForEmptyList()
+        {
+            var orderList = new List<Order>(); 
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+            controller.OverallRating();
+
+            var result = controller.ViewBag.rating;
+            Assert.IsNotNull(result, "ViewBag.rating should not be null");
+            Assert.AreEqual(0, result, "Should set ViewBag.rating to 0 for an empty list");
+        }
+
+        [TestMethod]
+        public void OverallRating_ShouldCalculateAverageRatingForSingleOrder()
+        {
+            var orderList = new List<Order>
+            {
+                new Order { OrderID = 1, Rating = 4 },
+            };
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+            controller.OverallRating();
+
+            var result = controller.ViewBag.rating;
+            Assert.IsNotNull(result, "ViewBag.rating should not be null");
+            Assert.AreEqual(4, result, "Should set ViewBag.rating to the rating of the single order");
+        }
+
+        [TestMethod]
+        public void OverallRating_ShouldCalculateAverageRatingForTwoOrders()
+        {
+            var orderList = new List<Order>
+            {
+                new Order { OrderID = 1, Rating = 4 },
+                new Order { OrderID = 2, Rating = 5 },
+            };
+
+            var orderDbSetMock = new Mock<DbSet<Order>>();
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Provider).Returns(orderList.AsQueryable().Provider);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.Expression).Returns(orderList.AsQueryable().Expression);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.ElementType).Returns(orderList.AsQueryable().ElementType);
+            orderDbSetMock.As<IQueryable<Order>>().Setup(m => m.GetEnumerator()).Returns(() => orderList.GetEnumerator());
+
+            var dbContextMock = new Mock<ApplicationDbContext>();
+            dbContextMock.Setup(d => d.Orders).Returns(orderDbSetMock.Object);
+
+            var controller = new HomeController(Mock.Of<ILogger<HomeController>>(), dbContextMock.Object);
+
+            controller.OverallRating();
+
+            var result = controller.ViewBag.rating;
+            Assert.IsNotNull(result, "ViewBag.rating should not be null");
+            Assert.AreEqual((decimal)4.5, result, "Should calculate the correct average rating for two orders");
+        }
 
     }
 }
