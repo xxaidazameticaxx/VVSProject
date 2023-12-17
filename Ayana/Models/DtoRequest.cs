@@ -7,7 +7,7 @@ namespace Ayana.Models
     {
         [Key]
         public int DtoRequestID { get; set; }
-       // public Subscription subscription { get; set; }
+        public Subscription subscription { get; set; }
         public Payment payment { get; set; }
 
         public Order order { get; set; }
