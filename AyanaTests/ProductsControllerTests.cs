@@ -759,7 +759,7 @@ namespace AyanaTests
         //written by: Vedran Mujić
         [TestMethod]
         [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
-        public async Task Create_WithError(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        public async Task Create_ProductWithPriceError(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
         {
             var product = new Product
             {

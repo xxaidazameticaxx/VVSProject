@@ -42,7 +42,7 @@ namespace AyanaTests
         }
         
 
-        //written by Vedran Mujič
+        //written by Vedran Mujić
         public static IEnumerable<object[]> GetTestData()
         {
             string xmlFilePath = @"C:\Users\rzyen\OneDrive\Desktop\VVSProject\AyanaTests\TestData\Products.xml";
@@ -65,10 +65,10 @@ namespace AyanaTests
             }
         }
 
-        //written by Vedran Mujič
+        //written by Vedran Mujić
         [TestMethod]
         [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method)]
-        public async Task Sort_DataDrivenTest(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
+        public async Task Sort_ShouldReturnCorrectTypeOfSubscription(int productId, string productName, string imageUrl, double price, string flowerType, int stock, string category, string description, string productType)
         {
             var product = new Product
             {

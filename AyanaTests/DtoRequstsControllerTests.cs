@@ -426,60 +426,7 @@ namespace AyanaTests
             Assert.AreEqual(orderType, result.ViewData["OrderType"]);
         }
 
-        // written by : Aida Zametica
-        [TestMethod]
-        [DynamicData(nameof(GetTestDataCsv), DynamicDataSourceType.Method)]
-        public void Cart_RedirectActionToCart_ShouldUpdateViewBagCorrectly(string Code,string Type,string Amount)
-        {
-            var cartList = new List<Cart>
-            {
-                new Cart { CustomerID = userId, ProductID = 1, ProductQuantity = 1 },
-                new Cart { CustomerID = "otherUserId", ProductID = 2, ProductQuantity = 1 },
-            };
-
-            var cartDbSetMock = GetDbSetMock(cartList);
-
-            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
-
-            var controllerMock = new Mock<DtoRequestsController>(dbContextMock.Object, discountCodeVerifierMock.Object);
-
-            controllerMock
-                .Setup(c => c.GetCartProducts(It.IsAny<List<Cart>>()))
-                .Returns<List<Cart>>(carts =>
-                {
-                    var cartProducts = new List<List<Product>>();
-
-                    foreach (var cart in carts)
-                    {
-                        var products = cart.ProductID == 1
-                            ? new List<Product> { new Product { ProductID = 1, Name = "testProduct", ImageUrl = "testImageUrl", FlowerType = "testFlowerType", Stock = 0, Category = "testCategory",Description="testDescription",productType="testProductType", Price = 20 } }
-                            : new List<Product>();
-
-                        cartProducts.Add(products);
-                    }
-
-                    return cartProducts;
-                });
-
-            var userMock = new Mock<ClaimsPrincipal>();
-            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
-            
-            controllerMock.Object.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = userMock.Object }
-            };
-
-            controllerMock.Object.Cart(Amount, Type, Code);
-
-            var viewBag = controllerMock.Object.ViewBag;
-
-            var userCarts = viewBag.UserCarts as List<Cart>;
-            var cartProducts = viewBag.CartProducts as List<List<Product>>;
-            var discountCode = viewBag.DiscountCode as string;
-            var totalAmountToPay = viewBag.TotalAmountToPay as double?;
-
-            controllerMock.Verify(c => c.GetCartProducts(It.IsAny<List<Cart>>()), Times.Once);
-        }
+        
 
         public static IEnumerable<object[]> GetTestDataCsv()
         {
@@ -663,6 +610,232 @@ namespace AyanaTests
 
             dbContextMock.Verify(c => c.SaveChanges(), Times.Once);
         }
+
+        //White box tests:
+        /*
+        [TestMethod]
+        
+        public void Cart_RedirectActionToCart_ShouldUpdateViewBagCorrectly()
+        {
+            var cartList = new List<Cart>
+            {
+                new Cart { CustomerID = userId, ProductID = 1, ProductQuantity = 1 },
+                new Cart { CustomerID = "otherUserId", ProductID = 2, ProductQuantity = 1 },
+            };
+
+            var cartDbSetMock = GetDbSetMock(cartList);
+
+            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
+
+            var controllerMock = new Mock<DtoRequestsController>(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            controllerMock
+                .Setup(c => c.GetCartProducts(It.IsAny<List<Cart>>()))
+                .Returns<List<Cart>>(carts =>
+                {
+                    var cartProducts = new List<List<Product>>();
+
+                    foreach (var cart in carts)
+                    {
+                        var products = cart.ProductID == 1
+                            ? new List<Product> { new Product { ProductID = 1, Name = "testProduct", ImageUrl = "testImageUrl", FlowerType = "testFlowerType", Stock = 0, Category = "testCategory", Description = "testDescription", productType = "testProductType", Price = 20 } }
+                            : new List<Product>();
+
+                        cartProducts.Add(products);
+                    }
+
+                    return cartProducts;
+                });
+
+            var userMock = new Mock<ClaimsPrincipal>();
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controllerMock.Object.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+            };
+
+            controllerMock.Object.Cart("10", "0", "DISCOUNT10");
+
+            var viewBag = controllerMock.Object.ViewBag;
+
+            var userCarts = viewBag.UserCarts as List<Cart>;
+            var cartProducts = viewBag.CartProducts as List<List<Product>>;
+            var discountCode = viewBag.DiscountCode as string;
+            var totalAmountToPay = viewBag.TotalAmountToPay as double?;
+
+            controllerMock.Verify(c => c.GetCartProducts(It.IsAny<List<Cart>>()), Times.Once);
+        }
+        */
+        
+        [TestMethod]
+
+        public void Cart_RedirectActionToCart_DiscountType1_ShouldUpdateViewBagCorrectly()
+        {
+            var cartList = new List<Cart>
+            {
+                new Cart { CustomerID = userId, ProductID = 1, ProductQuantity = 1 },
+                new Cart { CustomerID = "otherUserId", ProductID = 2, ProductQuantity = 1 },
+            };
+
+            var cartDbSetMock = GetDbSetMock(cartList);
+
+            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
+
+            var controllerMock = new Mock<DtoRequestsController>(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            controllerMock
+                .Setup(c => c.GetCartProducts(It.IsAny<List<Cart>>()))
+                .Returns<List<Cart>>(carts =>
+                {
+                    var cartProducts = new List<List<Product>>();
+
+                    foreach (var cart in carts)
+                    {
+                        var products = cart.ProductID == 1
+                            ? new List<Product> { new Product { ProductID = 1, Name = "testProduct", ImageUrl = "testImageUrl", FlowerType = "testFlowerType", Stock = 0, Category = "testCategory", Description = "testDescription", productType = "testProductType", Price = 20 } }
+                            : new List<Product>();
+
+                        cartProducts.Add(products);
+                    }
+
+                    return cartProducts;
+                });
+
+            var userMock = new Mock<ClaimsPrincipal>();
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controllerMock.Object.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+            };
+
+            controllerMock.Object.Cart("10", "0", "DISCOUNT10");
+
+            var viewBag = controllerMock.Object.ViewBag;
+
+            var userCarts = viewBag.UserCarts as List<Cart>;
+            var cartProducts = viewBag.CartProducts as List<List<Product>>;
+            var discountCode = viewBag.DiscountCode as string;
+            var totalAmountToPay = viewBag.TotalAmountToPay as double?;
+
+            controllerMock.Verify(c => c.GetCartProducts(It.IsAny<List<Cart>>()), Times.Once);
+        }
+
+        [TestMethod]
+
+        public void Cart_RedirectActionToCart_DiscountType1_NoUsersCarts_ShouldUpdateViewBagCorrectly()
+        {
+            var cartList = new List<Cart>
+            {
+                
+                new Cart { CustomerID = "otherUserId", ProductID = 2, ProductQuantity = 1 },
+            };
+
+            var cartDbSetMock = GetDbSetMock(cartList);
+
+            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
+
+            var controllerMock = new Mock<DtoRequestsController>(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            controllerMock
+                .Setup(c => c.GetCartProducts(It.IsAny<List<Cart>>()))
+                .Returns<List<Cart>>(carts =>
+                {
+                    var cartProducts = new List<List<Product>>();
+
+                    foreach (var cart in carts)
+                    {
+                        var products = cart.ProductID == 1
+                            ? new List<Product> { new Product { ProductID = 1, Name = "testProduct", ImageUrl = "testImageUrl", FlowerType = "testFlowerType", Stock = 0, Category = "testCategory", Description = "testDescription", productType = "testProductType", Price = 20 } }
+                            : new List<Product>();
+
+                        cartProducts.Add(products);
+                    }
+
+                    return cartProducts;
+                });
+
+            var userMock = new Mock<ClaimsPrincipal>();
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controllerMock.Object.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+            };
+
+            controllerMock.Object.Cart("10", "1", "DISCOUNT10");
+
+            var viewBag = controllerMock.Object.ViewBag;
+
+            var userCarts = viewBag.UserCarts as List<Cart>;
+            var cartProducts = viewBag.CartProducts as List<List<Product>>;
+            var discountCode = viewBag.DiscountCode as string;
+            var totalAmountToPay = viewBag.TotalAmountToPay as double?;
+
+            controllerMock.Verify(c => c.GetCartProducts(It.IsAny<List<Cart>>()), Times.Once);
+        }
+
+        [TestMethod]
+
+        public void Cart_RedirectActionToCart_DiscountType1_4Carts_ShouldUpdateViewBagCorrectly()
+        {
+            var cartList = new List<Cart>
+            {
+
+                new Cart { CustomerID = userId, ProductID = 2, ProductQuantity = 1 },
+                new Cart { CustomerID = userId, ProductID = 1, ProductQuantity = 1 },
+                new Cart { CustomerID = userId, ProductID = 2, ProductQuantity = 3 },
+                new Cart { CustomerID = userId, ProductID = 2, ProductQuantity = 3 },
+            };
+
+            var cartDbSetMock = GetDbSetMock(cartList);
+
+            dbContextMock.Setup(d => d.Cart).Returns(cartDbSetMock.Object);
+
+            var controllerMock = new Mock<DtoRequestsController>(dbContextMock.Object, discountCodeVerifierMock.Object);
+
+            controllerMock
+                .Setup(c => c.GetCartProducts(It.IsAny<List<Cart>>()))
+                .Returns<List<Cart>>(carts =>
+                {
+                    var cartProducts = new List<List<Product>>();
+
+                    foreach (var cart in carts)
+                    {
+                        var products = cart.ProductID == 1
+                            ? new List<Product> { new Product { ProductID = 1, Name = "testProduct", ImageUrl = "testImageUrl", FlowerType = "testFlowerType", Stock = 0, Category = "testCategory", Description = "testDescription", productType = "testProductType", Price = 20 } }
+                            : new List<Product>();
+
+                        cartProducts.Add(products);
+                    }
+
+                    return cartProducts;
+                });
+
+            var userMock = new Mock<ClaimsPrincipal>();
+            userMock.Setup(u => u.FindFirst(ClaimTypes.NameIdentifier)).Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+
+            controllerMock.Object.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userMock.Object }
+            };
+
+            controllerMock.Object.Cart("10", "1", "DISCOUNT10");
+
+            var viewBag = controllerMock.Object.ViewBag;
+
+            var userCarts = viewBag.UserCarts as List<Cart>;
+            var cartProducts = viewBag.CartProducts as List<List<Product>>;
+            var discountCode = viewBag.DiscountCode as string;
+            var totalAmountToPay = viewBag.TotalAmountToPay as double?;
+
+            controllerMock.Verify(c => c.GetCartProducts(It.IsAny<List<Cart>>()), Times.Once);
+        }
+
+
+
+
 
     }
 }

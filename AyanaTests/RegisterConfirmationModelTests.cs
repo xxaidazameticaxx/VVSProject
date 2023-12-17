@@ -292,8 +292,8 @@ namespace AyanaTests
             var result = await _registerConfirmationModel.OnPostAsync(confirmationCode, returnUrl);
 
             // Assert
-            Assert.IsInstanceOfType(result, typeof(Microsoft.AspNetCore.Mvc.RedirectToPageResult)); // Corrected assertion type
-            Assert.AreEqual(2, _registerConfirmationModel.ModelState.ErrorCount); // Check that errors are added
+            Assert.IsInstanceOfType(result, typeof(Microsoft.AspNetCore.Mvc.RedirectToPageResult)); 
+            Assert.AreEqual(2, _registerConfirmationModel.ModelState.ErrorCount); 
 
             // Optionally, check specific error messages
             Assert.IsTrue(_registerConfirmationModel.ModelState.ContainsKey(string.Empty));
