@@ -272,5 +272,42 @@ namespace Ayana.Controllers
             return _context.Products.Any(e => e.ProductID == id);
         }
 
+
+        //Metohod for "White box" testing
+        //A method that applies a discount for a product whose price is greater than 50BAM, and otherwise, adds a free gift to the product.
+        public void ProcessProducts(List<Product> products)
+        {
+            if (products != null && products.Any())
+            {
+                foreach (var product in products)
+                {
+
+                    if (product.Price > 50)
+                    {
+                        ApplyDiscount(product);
+                        Console.WriteLine("Na proizvod je uračunat popust 10%!");
+                    }
+                    else
+                    {
+                        ApplyOtherDiscount(product);
+                        Console.WriteLine("Uz proizvod je dodan i besplatan poklon!");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Nema dostupnih proizvoda za obradu.");
+            }
+        }
+
+        private void ApplyDiscount(Product product)
+        {
+            product.Price *= 0.9; 
+        }
+
+        private void ApplyOtherDiscount(Product product)
+        {
+            product.Description += " + Besplatan poklon!";
+        }
     }
 }
